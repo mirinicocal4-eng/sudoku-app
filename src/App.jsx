@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 // Utils & Logic
-import { generateBoard, isWin } from './utils/sudokuLogic';
-import { generateWordSearch } from './utils/wordSearchLogic';
-import { initMergeGrid, handleMerge, MERGE_ITEMS } from './utils/mergeLogic';
-import { initMatch3Grid, checkMatches, swap, MATCH3_ITEMS } from './utils/match3Logic';
 import { TITULOS, OBJETOS, FELICITACIONES, EVIDENCIAS_POSIBLES, SOSPECHOSOS, BARRIOS, PERSONAJES, GAME_ASIG, PUNTOS_MAPA } from './utils/constants';
 
 // Components
@@ -12,6 +8,14 @@ import { CityMap } from './components/CityMap';
 import { Detective } from './components/Detective';
 import { Warehouse } from './components/Warehouse';
 import { CaseSelector } from './components/CaseSelector';
+
+// Game Components
+import { SudokuGame } from './components/SudokuGame';
+import { Match3Game } from './components/Match3Game';
+import { WordSearchGame } from './components/WordSearchGame';
+import { MergeGame } from './components/MergeGame';
+import { PuzzleGame } from './components/PuzzleGame';
+import { HiddenItemsGame } from './components/HiddenItemsGame';
 
 const getXPInfo = (score) => {
   let level = 1, xpNeeded = 500, tempScore = score;
@@ -42,9 +46,6 @@ const speak = (text, isMuted, gender = 'male') => {
   window.speechSynthesis.speak(utterance);
 };
 
-const ESCENAS = ["/escena_crimen.png", "/escena_puerto.png", "/escena_mansion.png", "/escena_casino.png", "/escena_callejon.png"];
-const OBJETOS_OCULTOS = ["🕵️", "🔫", "🩸", "💼", "🚬", "🗝️", "📱", "🍷"];
-
 function App() {
   // --- STATE ---
   const [view, setView] = useState('menu');
@@ -62,7 +63,6 @@ function App() {
   const [infiniteEnergyTime, setInfiniteEnergyTime] = useState(0);
   const [evidence, setEvidence] = useState([]);
   const [showReward, setShowReward] = useState(null);
-  const [gameStatus, setGameStatus] = useState('playing');
   
   // Temporizador de Energía Infinita (Turbo)
   useEffect(() => {
@@ -73,22 +73,6 @@ function App() {
       return () => clearInterval(timer);
     }
   }, [infiniteEnergyTime]);
-  
-  // Game States
-  const [board, setBoard] = useState([]);
-  const [solution, setSolution] = useState([]);
-  const [selectedCell, setSelectedCell] = useState(null);
-  const [wsData, setWsData] = useState({ grid: [], words: [] });
-  const [selectedCells, setSelectedCells] = useState([]);
-  const [mergeGrid, setMergeGrid] = useState([]);
-  const [match3Grid, setMatch3Grid] = useState([]);
-  const [match3Score, setMatch3Score] = useState(0);
-  const [match3Moves, setMatch3Moves] = useState(12);
-  const [selectedMatch3Idx, setSelectedMatch3Idx] = useState(null);
-  const [puzzleGrid, setPuzzleGrid] = useState([]);
-  const [currentScene, setCurrentScene] = useState(ESCENAS[0]);
-  const [draggedIdx, setDraggedIdx] = useState(null);
-  const [hiddenItems, setHiddenItems] = useState([]);
 
   // --- EFFECTS ---
   useEffect(() => {
@@ -119,7 +103,14 @@ function App() {
     const capitulo = Math.floor((lvl - 1) / 7) + 1;
     const barrio = BARRIOS[(capitulo - 1) % BARRIOS.length];
     const titulo = `${TITULOS[(lvl * 7) % TITULOS.length]} ${OBJETOS[(lvl * 3) % OBJETOS.length]}`;
-    return { capitulo, barrio, titulo: `CAPÍTULO ${capitulo}: ${barrio}`, mision: `CASO #${lvl}: ${titulo}`, desc: `Investigación en el ${barrio} sobre ${titulo}.`, sospechoso: SOSPECHOSOS[(lvl * 5) % SOSPECHOSOS.length] };
+    return { 
+      capitulo, 
+      barrio, 
+      titulo: `CAPÍTULO ${capitulo}: ${barrio}`, 
+      mision: `CASO #${lvl}: ${titulo}`, 
+      desc: `Investigación en el ${barrio} sobre ${titulo}.`, 
+      sospechoso: SOSPECHOSOS[(lvl * 5) % SOSPECHOSOS.length] 
+    };
   };
 
   const startNewGame = (lvl, type) => {
@@ -127,15 +118,9 @@ function App() {
     if (!isFree && energy < 20) { alert("Agotado."); return; }
     if (!isFree) setEnergy(e => { localStorage.setItem('noir-energy', e-20); return e-20; });
     
-    setGameType(type); setLevel(lvl); setGameStatus('playing'); setShowReward(null);
-    setMatch3Score(0); setMatch3Moves(12); setSelectedMatch3Idx(null);
-    
-    if (type === 'sudoku') { const { initial, solution: sol } = generateBoard('easy'); setBoard(initial); setSolution(sol); }
-    else if (type === 'wordsearch') setWsData(generateWordSearch('easy'));
-    else if (type === 'merge') setMergeGrid(initMergeGrid());
-    else if (type === 'match3') setMatch3Grid(initMatch3Grid());
-    else if (type === 'puzzle') { setCurrentScene(ESCENAS[lvl % ESCENAS.length]); setPuzzleGrid([0,1,2,3,4,5,6,7,8,9].map(id => ({ id, pos: id })).sort(() => Math.random() - 0.5)); }
-    else if (type === 'hidden') { setCurrentScene(ESCENAS[lvl % ESCENAS.length]); setHiddenItems(Array(5).fill(0).map(() => ({ x: 10 + Math.random() * 80, y: 10 + Math.random() * 80, icon: OBJETOS_OCULTOS[Math.floor(Math.random() * OBJETOS_OCULTOS.length)], found: false, id: Math.random() }))); }
+    setGameType(type); 
+    setLevel(lvl); 
+    setShowReward(null);
     setView('game');
   };
 
@@ -155,7 +140,7 @@ function App() {
       });
     } else setDiamonds(d => d + 10);
 
-    setShowReward({ pts, diams: alreadyHas ? 15 : 5, msg: `¡CASO CERRADO! Hemos arrestado a ${caseInfo.sospechoso}.`, evidence: alreadyHas ? null : evItem });
+    setShowReward({ pts, diams: alreadyHas ? 15 : 5, msg: `¡CASO CERRADO! Hemos arrestado a ${caseInfo.sospechoso.name}.`, evidence: alreadyHas ? null : evItem });
     if (level === unlockedLevel) { setUnlockedLevel(level + 1); localStorage.setItem('noir-progress', level + 1); }
   };
 
@@ -208,15 +193,14 @@ function App() {
   return (
     <div className="app-container" style={{paddingLeft: '420px'}}>
       <Detective thought={thought} />
-      <h1 className="title">{gameType.toUpperCase()}</h1>
+      <h1 className="title" style={{textTransform:'uppercase', letterSpacing:'4px'}}>{gameType}</h1>
       <div className="game-card">
-        {gameType === 'sudoku' && <div className="sudoku-grid">{board.map((row, r) => row.map((cell, c) => (<div key={`${r}-${c}`} className={`cell ${selectedCell?.r===r && selectedCell?.c===c?'selected':''}`} onClick={()=>setSelectedCell({r,c})}>{cell||''}</div>)))}</div>}
-        {gameType === 'match3' && <div className="match3-grid">{match3Grid.map((it, i) => (<div key={it.uid} className={`match3-slot ${selectedMatch3Idx===i?'selected':''}`} onClick={()=>{ if(selectedMatch3Idx===null) setSelectedMatch3Idx(i); else { const ng = swap(match3Grid, selectedMatch3Idx, i); if(checkMatches(ng).matches.length>0){ setMatch3Grid(ng); setMatch3Score(s=>s+1); if(match3Score>10) finishGame(); } setSelectedMatch3Idx(null); } }}>{it.icon}</div>))}</div>}
-        {/* Otros juegos simplificados aquí o en componentes externos */}
-        <div className="controls" style={{marginTop:'20px', display:'flex', gap:'10px', justifyContent:'center'}}>
-           {gameType==='sudoku' && [1,2,3,4,5,6,7,8,9].map(n=><button key={n} className="num-btn" onClick={()=>{ if(selectedCell){ const nb=[...board]; nb[selectedCell.r][selectedCell.c]=n; setBoard(nb); if(isWin(nb,solution)) finishGame(); } }}>{n}</button>)}
-           <button className="btn btn-primary" onClick={() => setView('menu')}>SALIR</button>
-        </div>
+        {gameType === 'sudoku' && <SudokuGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'match3' && <Match3Game level={level} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'wordsearch' && <WordSearchGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'merge' && <MergeGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'puzzle' && <PuzzleGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'hidden' && <HiddenItemsGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
       </div>
       {renderReward()}
     </div>
