@@ -45,12 +45,12 @@ export function solve(board) {
 
 export function generateBoard(difficulty = 'easy') {
   const board = Array(9).fill(null).map(() => Array(9).fill(0));
-  
+
   // Fill the board with a valid solution
   fillRandomly(board);
-  
+
   const solution = board.map(row => [...row]);
-  
+
   // Remove numbers based on difficulty
   let attempts;
   switch (difficulty) {
@@ -59,7 +59,7 @@ export function generateBoard(difficulty = 'easy') {
     case 'hard': attempts = 55; break;
     default: attempts = 30;
   }
-  
+
   while (attempts > 0) {
     let row = Math.floor(Math.random() * 9);
     let col = Math.floor(Math.random() * 9);
@@ -70,7 +70,7 @@ export function generateBoard(difficulty = 'easy') {
     board[row][col] = 0;
     attempts--;
   }
-  
+
   return { initial: board, solution };
 }
 
