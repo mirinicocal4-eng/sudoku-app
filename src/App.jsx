@@ -64,6 +64,16 @@ function App() {
   const [showReward, setShowReward] = useState(null);
   const [gameStatus, setGameStatus] = useState('playing');
   
+  // Temporizador de Energía Infinita (Turbo)
+  useEffect(() => {
+    if (infiniteEnergyTime > 0) {
+      const timer = setInterval(() => {
+        setInfiniteEnergyTime(t => t - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [infiniteEnergyTime]);
+  
   // Game States
   const [board, setBoard] = useState([]);
   const [solution, setSolution] = useState([]);

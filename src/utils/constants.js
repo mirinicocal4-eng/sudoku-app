@@ -21,8 +21,14 @@ export const EVIDENCIAS_POSIBLES = [
 ];
 
 export const SOSPECHOSOS = [
-  "Tony 'El Flaco'", "Madame Red", "El Alcalde Corrupto", "Sr. Sombras", 
-  "La Viuda Negra", "El Falsificador", "Capo Mancini", "Doctor Muerte"
+  { name: "Tony 'El Flaco'", img: "/tony_el_flaco_1778190949016.png" },
+  { name: "Madame Red", img: "/madame_red_1778190961582.png" },
+  { name: "El Alcalde Corrupto", img: "/alcalde_corrupto_1778190973480.png" },
+  { name: "Sr. Sombras", img: "/sr_sombras_1778190987316.png" },
+  { name: "La Viuda Negra", img: "/madame_red_1778190961582.png" },
+  { name: "El Falsificador", img: "/tony_el_flaco_1778190949016.png" },
+  { name: "Capo Mancini", img: "/alcalde_corrupto_1778190973480.png" },
+  { name: "Doctor Muerte", img: "/sr_sombras_1778190987316.png" }
 ];
 
 export const BARRIOS = ["Distrito Financiero", "Muelles del Puerto", "Casco Antiguo", "Barrio Industrial", "Zona Residencial", "El Casino", "Suburbios"];

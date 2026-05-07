@@ -3,9 +3,17 @@ import { PERSONAJES, GAME_ASIG } from '../utils/constants';
 
 export const CaseSelector = ({ level, info, isTestMode, isMuted, speak, startNewGame, setView, renderDetective }) => {
   const allTypes = ['hidden', 'sudoku', 'wordsearch', 'merge', 'match3', 'puzzle'];
+  const isBossLevel = level % 7 === 0;
   const count = isTestMode ? 6 : (level <= 3 ? 1 : level <= 6 ? 2 : 3);
-  const available = isTestMode ? allTypes : allTypes.sort((a,b)=>((level*a.length)%17)-(level*b.length%17)).slice(0, count);
-  const labels = { hidden: "🔍 Escena del Crimen", sudoku: "🔬 Decodificar", wordsearch: "📁 Archivos", merge: "🧪 Laboratorio", match3: "⚖️ Interrogatorio", puzzle: "🧩 Reconstrucción" };
+  const available = isBossLevel ? ['match3'] : (isTestMode ? allTypes : allTypes.sort((a,b)=>((level*a.length)%17)-(level*b.length%17)).slice(0, count));
+  const labels = { 
+    hidden: "🔍 Escena del Crimen", 
+    sudoku: "🔬 Decodificar", 
+    wordsearch: "📁 Archivos", 
+    merge: "🧪 Laboratorio", 
+    match3: isBossLevel ? "⚖️ INTERROGATORIO FINAL" : "⚖️ Interrogatorio", 
+    puzzle: "🧩 Reconstrucción" 
+  };
 
   const pKey = GAME_ASIG[available[0]];
   const p = PERSONAJES[pKey];
@@ -38,9 +46,18 @@ export const CaseSelector = ({ level, info, isTestMode, isMuted, speak, startNew
           </div>
         </div>
         <div style={{width:'180px', textAlign:'center'}}>
-          <img src={p.img} style={{width:'100%', borderRadius:'8px', border:'2px solid var(--noir-ink)', boxShadow:'5px 5px 0 rgba(0,0,0,0.2)'}} alt="p" />
-          <p style={{fontSize:'0.7rem', fontWeight:'bold', marginTop:'5px', color:'var(--noir-ink)'}}>{p.name}</p>
-          <p style={{fontSize:'0.65rem', fontStyle:'italic', marginTop:'5px'}}>"{p.text}"</p>
+          <div style={{position:'relative', border:'3px solid var(--noir-red)', borderRadius:'8px', padding:'5px', background:'white'}}>
+            <div style={{position:'absolute', top:'-10px', left:'50%', transform:'translateX(-50%)', background:'var(--noir-red)', color:'white', padding:'2px 10px', fontSize:'0.6rem', fontWeight:'bold', borderRadius:'4px'}}>
+              WANTED
+            </div>
+            <img src={info.sospechoso.img} style={{width:'100%', filter:'grayscale(100%) brightness(0.8)'}} alt="suspect" />
+          </div>
+          <p style={{fontSize:'0.7rem', fontWeight:'bold', marginTop:'8px', color:'var(--noir-ink)', textTransform:'uppercase'}}>{info.sospechoso.name}</p>
+          <div style={{marginTop:'15px', borderTop:'1px solid #ccc', paddingTop:'10px'}}>
+            <p style={{fontSize:'0.6rem', opacity:0.7}}>ASIGNADO POR:</p>
+            <img src={p.img} style={{width:'40px', borderRadius:'50%', border:'1px solid #999', marginTop:'5px'}} alt="agent" />
+            <p style={{fontSize:'0.6rem', fontWeight:'bold'}}>{p.name}</p>
+          </div>
         </div>
       </div>
     </div>
