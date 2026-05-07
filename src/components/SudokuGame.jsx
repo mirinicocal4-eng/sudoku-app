@@ -46,11 +46,15 @@ export const SudokuGame = ({ level, onWin, onExit }) => {
           ))
         ))}
       </div>
-      <div className="controls" style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-          <button key={n} className="num-btn" onClick={() => handleNumberInput(n)}>{n}</button>
-        ))}
-        <button className="btn btn-primary" onClick={onExit}>SALIR</button>
+      <div className="controls" style={{ marginTop: '20px' }}>
+        <div className="number-pad">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+            <button key={n} className="num-btn" onClick={() => handleNumberInput(n)}>{n}</button>
+          ))}
+        </div>
+        <div style={{marginTop: '20px', textAlign: 'center'}}>
+          <button className="btn" onClick={onExit}>ABANDONAR</button>
+        </div>
       </div>
     </div>
   );

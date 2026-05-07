@@ -44,7 +44,7 @@ export const WordSearchGame = ({ level, onWin, onExit }) => {
           display: 'grid', 
           gridTemplateColumns: `repeat(${data.grid.length}, 30px)`,
           gap: '2px',
-          background: 'rgba(255,255,255,0.1)',
+          background: 'var(--noir-ink)',
           padding: '10px',
           borderRadius: '8px'
         }}>
@@ -66,10 +66,11 @@ export const WordSearchGame = ({ level, onWin, onExit }) => {
                   fontSize: '0.8rem',
                   cursor: 'pointer',
                   borderRadius: '3px',
-                  background: isFound ? 'var(--noir-red)' : isSelected ? 'gold' : 'rgba(255,255,255,0.05)',
-                  color: (isFound || isSelected) ? 'black' : 'white',
+                  background: isFound ? 'var(--noir-red)' : isSelected ? 'gold' : 'var(--noir-ink)',
+                  color: 'white',
                   fontWeight: 'bold',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }}
               >
                 {char}

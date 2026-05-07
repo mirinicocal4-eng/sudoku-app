@@ -17,6 +17,16 @@ import { MergeGame } from './components/MergeGame';
 import { PuzzleGame } from './components/PuzzleGame';
 import { HiddenItemsGame } from './components/HiddenItemsGame';
 
+const NARRATIVAS = [
+  "Una llamada anónima nos alerta de movimientos extraños en la zona. Empezamos la vigilancia.",
+  "Hemos encontrado rastros físicos en el lugar. Necesitamos analizar estas pruebas con cuidado.",
+  "Un testigo clave ha aparecido, pero tiene miedo de hablar. Hay que presionarle un poco.",
+  "Las grabaciones de seguridad revelan una silueta familiar. Todo apunta en una dirección.",
+  "Siguiendo el rastro del dinero, hemos llegado a un punto crítico de la investigación.",
+  "Tenemos el arma o el objeto del delito. El cerco sobre el sospechoso se está cerrando.",
+  "Interrogatorio Final: Tenemos todas las pruebas. Es hora de que confiese sus crímenes."
+];
+
 const getXPInfo = (score) => {
   let level = 1, xpNeeded = 500, tempScore = score;
   while (tempScore >= xpNeeded) { tempScore -= xpNeeded; level++; xpNeeded += 500; }
@@ -50,10 +60,16 @@ function App() {
   // --- STATE ---
   const [view, setView] = useState('menu');
   const [isMuted, setIsMuted] = useState(false);
-  const [isTestMode, setIsTestMode] = useState(false);
+  const [isTestMode, setIsTestMode] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
-  const [level, setLevel] = useState(1);
-  const [unlockedLevel, setUnlockedLevel] = useState(1);
+  
+  // Progression
+  const [unlockedCases, setUnlockedCases] = useState(1);
+  const [currentCase, setCurrentCase] = useState(1);
+  const [caseSteps, setCaseSteps] = useState({ 1: 1 }); // { caseIdx: step }
+  
+  const currentStep = caseSteps[currentCase] || 1;
+  
   const [gameType, setGameType] = useState('sudoku');
   const [thought, setThought] = useState("");
   const [score, setScore] = useState(0);
@@ -76,12 +92,14 @@ function App() {
 
   // --- EFFECTS ---
   useEffect(() => {
-    const savedLvl = localStorage.getItem('noir-progress');
+    const savedCases = localStorage.getItem('noir-cases');
+    const savedSteps = localStorage.getItem('noir-case-steps');
     const savedScore = localStorage.getItem('noir-score');
     const savedDiams = localStorage.getItem('noir-diamonds');
     const savedInv = localStorage.getItem('noir-inventory');
     const savedEv = localStorage.getItem('noir-evidence');
-    if (savedLvl) setUnlockedLevel(parseInt(savedLvl));
+    if (savedCases) setUnlockedCases(parseInt(savedCases));
+    if (savedSteps) setCaseSteps(JSON.parse(savedSteps));
     if (savedScore) setScore(parseInt(savedScore));
     if (savedDiams) setDiamonds(parseInt(savedDiams));
     if (savedInv) setInventory(JSON.parse(savedInv));
@@ -89,6 +107,8 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (view === 'game') return;
+
     let possibleThoughts = ["La lluvia no limpia el pecado de esta ciudad.", "Necesito una pista.", "El café está frío."];
     if (view === 'warehouse') possibleThoughts = ["El archivo nunca miente.", "Tantas pruebas, tan poco tiempo."];
     else if (view === 'selector') possibleThoughts = ["Miller me vigila de cerca.", "Este informe parece incompleto."];
@@ -98,50 +118,174 @@ function App() {
     if (view === 'menu' || view === 'warehouse') speak(t, isMuted, 'male');
   }, [view, isMuted]);
 
+  const [activeEvent, setActiveEvent] = useState(null);
+  
+  const triggerRandomEvent = () => {
+    // 20% de probabilidad de evento al volver al menú
+    if (Math.random() > 0.2) return;
+    
+    const personajesEvento = [
+      { name: "Miller", img: "/detective_normal.png", msg: "¡Detective! Ha surgido una emergencia en comisaría. ¿Puedes ayudarme con este informe?", type: "sudoku", reward: { diams: 10 } },
+      { name: "Oficial Martínez", img: "/oficial_martinez.png", msg: "¡Señor! He interceptado una comunicación sospechosa. ¿Podría echarle un vistazo?", type: "wordsearch", reward: { food: 1 } },
+      { name: "Tony 'El Flaco'", img: "/tony_el_flaco.png", msg: "¿Te crees muy listo, detective? Resuelve esto si quieres que te cuente lo que sé.", type: "puzzle", reward: { diams: 15 } },
+      { name: "Sujeto Desconocido", img: "/sospechoso_misterio.png", msg: "Te estoy vigilando. Veamos qué tan rápido eres encontrando esto...", type: "hidden", reward: { coffee: 1 } }
+    ];
+    
+    const ev = personajesEvento[Math.floor(Math.random() * personajesEvento.length)];
+    setActiveEvent(ev);
+  };
+
+  useEffect(() => {
+    if (view === 'menu' && !activeEvent) {
+      triggerRandomEvent();
+    }
+  }, [view]);
+
   // --- LOGIC ---
-  const getCaseInfo = (lvl) => {
-    const capitulo = Math.floor((lvl - 1) / 7) + 1;
-    const barrio = BARRIOS[(capitulo - 1) % BARRIOS.length];
-    const titulo = `${TITULOS[(lvl * 7) % TITULOS.length]} ${OBJETOS[(lvl * 3) % OBJETOS.length]}`;
+  const startEvent = () => {
+    const ev = activeEvent;
+    setGameType(ev.type);
+    setShowReward(null);
+    setView('game');
+  };
+
+  const getCaseInfo = (caseIdx, step) => {
+    const barrio = BARRIOS[(caseIdx - 1) % BARRIOS.length];
+    const titulo = `${TITULOS[(caseIdx * 7) % TITULOS.length]} ${OBJETOS[(caseIdx * 3) % OBJETOS.length]}`;
+    const realSospechoso = SOSPECHOSOS[(caseIdx * 5) % SOSPECHOSOS.length];
+    const narrativa = NARRATIVAS[step - 1] || "Investigación en curso...";
+    
+    const sospechoso = step === 7 ? realSospechoso : {
+      name: "Sujeto Desconocido",
+      img: "/sospechoso_misterio.png",
+      text: "No sabemos quién es todavía. Necesitamos más pruebas.",
+      gender: "male"
+    };
+
     return { 
-      capitulo, 
-      barrio, 
-      titulo: `CAPÍTULO ${capitulo}: ${barrio}`, 
-      mision: `CASO #${lvl}: ${titulo}`, 
-      desc: `Investigación en el ${barrio} sobre ${titulo}.`, 
-      sospechoso: SOSPECHOSOS[(lvl * 5) % SOSPECHOSOS.length] 
+      caseIdx, step, barrio, 
+      titulo: `CASO #${caseIdx}: ${barrio}`, 
+      mision: step === 7 ? `⚖️ INTERROGATORIO FINAL: ${realSospechoso.name}` : `PASO ${step}/7: ${titulo}`, 
+      desc: narrativa, 
+      sospechoso
     };
   };
 
-  const startNewGame = (lvl, type) => {
+  const renderEventOverlay = () => {
+    if (!activeEvent) return null;
+    return (
+      <div className="reward-overlay">
+        <div className="reward-content event-card" style={{border: '4px solid var(--noir-red)'}}>
+          <div style={{display:'flex', gap:'20px', alignItems:'center'}}>
+            <img src={activeEvent.img} alt={activeEvent.name} style={{width:'100px', height:'100px', borderRadius:'10px', border:'2px solid var(--noir-ink)'}} />
+            <div style={{textAlign:'left'}}>
+              <h3 style={{color:'var(--noir-red)', margin:0}}>{activeEvent.name}</h3>
+              <p style={{fontSize:'0.9rem', margin:'10px 0', fontFamily:'Inter'}}>{activeEvent.msg}</p>
+              <div style={{display:'flex', gap:'10px'}}>
+                <button className="btn btn-primary" onClick={startEvent}>ACEPTAR DESAFÍO</button>
+                <button className="btn" onClick={() => setActiveEvent(null)}>IGNORAR</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const startNewGame = (caseIdx, type) => {
     const isFree = isTestMode || infiniteEnergyTime > 0;
     if (!isFree && energy < 20) { alert("Agotado."); return; }
     if (!isFree) setEnergy(e => { localStorage.setItem('noir-energy', e-20); return e-20; });
     
+    setThought(""); // Desaparece la frase al iniciar el juego
     setGameType(type); 
-    setLevel(lvl); 
     setShowReward(null);
     setView('game');
   };
 
   const finishGame = () => {
-    const pts = 100 + (level * 10);
+    const pts = 100 + (currentCase * 10);
     setScore(s => { localStorage.setItem('noir-score', s + pts); return s + pts; });
     
-    const caseInfo = getCaseInfo(level);
-    const evItem = EVIDENCIAS_POSIBLES[Math.floor(Math.random() * EVIDENCIAS_POSIBLES.length)];
-    const alreadyHas = evidence.some(e => e.name === evItem.name);
-
-    if (!alreadyHas) {
-      setEvidence(prev => {
-        const next = [...prev, { ...evItem, date: new Date().toLocaleDateString() }];
-        localStorage.setItem('noir-evidence', JSON.stringify(next));
+    // Si era un evento aleatorio
+    if (activeEvent) {
+      const reward = activeEvent.reward;
+      if (reward.diams) setDiamonds(d => d + reward.diams);
+      if (reward.coffee) setInventory(i => ({...i, coffee: i.coffee + reward.coffee}));
+      
+      setShowReward({
+        pts: pts * 1.5,
+        diams: reward.diams || 0,
+        msg: `¡Desafío de ${activeEvent.name} completado! Has ganado recompensas extra.`,
+        evidence: null
+      });
+      setActiveEvent(null);
+      return;
+    }
+    
+    const caseInfo = getCaseInfo(currentCase, currentStep);
+    
+    if (currentStep === 7) {
+      // Caso cerrado
+      const extraCoffee = 1;
+      const extraFood = 1;
+      setInventory(prev => {
+        const next = { ...prev, coffee: prev.coffee + extraCoffee, food: prev.food + extraFood };
+        localStorage.setItem('noir-inventory', JSON.stringify(next));
         return next;
       });
-    } else setDiamonds(d => d + 10);
 
-    setShowReward({ pts, diams: alreadyHas ? 15 : 5, msg: `¡CASO CERRADO! Hemos arrestado a ${caseInfo.sospechoso.name}.`, evidence: alreadyHas ? null : evItem });
-    if (level === unlockedLevel) { setUnlockedLevel(level + 1); localStorage.setItem('noir-progress', level + 1); }
+      setShowReward({ 
+        pts: pts * 2, 
+        diams: 20, 
+        msg: `¡CASO CERRADO! Hemos arrestado a ${caseInfo.sospechoso.name}. Recompensa extra: ☕x${extraCoffee} 🥪x${extraFood}`, 
+        evidence: null 
+      });
+      if (currentCase === unlockedCases) {
+        setUnlockedCases(prev => { localStorage.setItem('noir-cases', prev + 1); return prev + 1; });
+      }
+      setCaseSteps(prev => {
+        const next = { ...prev, [currentCase]: 1 };
+        localStorage.setItem('noir-case-steps', JSON.stringify(next));
+        return next;
+      });
+    } else {
+      // Conseguir pista
+      const evItem = EVIDENCIAS_POSIBLES[Math.floor(Math.random() * EVIDENCIAS_POSIBLES.length)];
+      const alreadyHas = evidence.some(e => e.name === evItem.name);
+
+      // Recompensa aleatoria de comida (30% probabilidad)
+      let foundFood = null;
+      if (Math.random() < 0.3) {
+        foundFood = Math.random() < 0.5 ? 'coffee' : 'food';
+        setInventory(prev => {
+          const next = { ...prev, [foundFood]: prev[foundFood] + 1 };
+          localStorage.setItem('noir-inventory', JSON.stringify(next));
+          return next;
+        });
+      }
+
+      if (!alreadyHas) {
+        setEvidence(prev => {
+          const next = [...prev, { ...evItem, date: new Date().toLocaleDateString() }];
+          localStorage.setItem('noir-evidence', JSON.stringify(next));
+          return next;
+        });
+      }
+      
+      const foodMsg = foundFood ? ` y has encontrado ${foundFood === 'coffee' ? 'un ☕' : 'una 🥪'}` : '';
+      setShowReward({ 
+        pts, 
+        diams: 5, 
+        msg: `¡Pista encontrada! ${evItem.name} nos acerca más a ${caseInfo.sospechoso.name}${foodMsg}.`, 
+        evidence: alreadyHas ? null : evItem 
+      });
+      setCaseSteps(prev => {
+        const next = { ...prev, [currentCase]: currentStep + 1 };
+        localStorage.setItem('noir-case-steps', JSON.stringify(next));
+        return next;
+      });
+    }
   };
 
   // --- RENDER ---
@@ -181,13 +325,35 @@ function App() {
     <div className="app-container" style={{paddingLeft: '420px', paddingTop: '70px'}}>
       <Detective thought={thought} />
       {renderHUD()}
-      <CityMap unlockedLevel={unlockedLevel} setLevel={setLevel} setView={setView} evidenceCount={evidence.length} />
+      <CityMap unlockedCases={unlockedCases} setCurrentCase={setCurrentCase} setView={setView} evidenceCount={evidence.length} />
+      {renderEventOverlay()}
       {showLogin && <div className="reward-overlay"><div className="reward-content"><h3>LOGIN</h3><button className="btn btn-primary" onClick={()=>setShowLogin(false)}>Cerrar</button></div></div>}
     </div>
   );
 
-  if (view === 'warehouse') return <Warehouse evidence={evidence} setView={setView} />;
-  if (view === 'selector') return <CaseSelector level={level} info={getCaseInfo(level)} isTestMode={isTestMode} isMuted={isMuted} speak={speak} startNewGame={startNewGame} setView={setView} renderDetective={()=><Detective thought={thought}/>} />;
+  if (view === 'warehouse') return (
+    <Warehouse 
+      evidence={evidence} 
+      inventory={inventory} 
+      setInventory={setInventory} 
+      setEnergy={setEnergy} 
+      setView={setView} 
+    />
+  );
+  if (view === 'selector') return (
+    <CaseSelector 
+      caseIdx={currentCase} 
+      step={currentStep} 
+      unlockedCases={unlockedCases}
+      info={getCaseInfo(currentCase, currentStep)} 
+      isTestMode={isTestMode} 
+      isMuted={isMuted} 
+      speak={speak} 
+      startNewGame={startNewGame} 
+      setView={setView} 
+      renderDetective={()=><Detective thought={thought}/>} 
+    />
+  );
 
   // View Game
   return (
@@ -195,12 +361,12 @@ function App() {
       <Detective thought={thought} />
       <h1 className="title" style={{textTransform:'uppercase', letterSpacing:'4px'}}>{gameType}</h1>
       <div className="game-card">
-        {gameType === 'sudoku' && <SudokuGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'match3' && <Match3Game level={level} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'wordsearch' && <WordSearchGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'merge' && <MergeGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'puzzle' && <PuzzleGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'hidden' && <HiddenItemsGame level={level} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'sudoku' && <SudokuGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'match3' && <Match3Game level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'wordsearch' && <WordSearchGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'merge' && <MergeGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'puzzle' && <PuzzleGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'hidden' && <HiddenItemsGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
       </div>
       {renderReward()}
     </div>
