@@ -1,53 +1,70 @@
 export const MATCH3_ITEMS = [
-  { id: 1, icon: "⚖️", name: "Justicia" },
-  { id: 2, icon: "🛡️", name: "Prueba" },
-  { id: 3, icon: "🗣️", name: "Testimonio" },
-  { id: 4, icon: "🚫", name: "Mentira" },
-  { id: 5, icon: "📜", name: "Orden" }
+  { id: 1, icon: '📜', name: 'Documento' },
+  { id: 2, icon: '📞', name: 'Llamada' },
+  { id: 3, icon: '💰', name: 'Soborno' },
+  { id: 4, icon: '🚬', name: 'Cigarrillo' },
+  { id: 5, icon: '🧊', name: 'Prueba' },
+  { id: 6, icon: '💣', name: 'Bomba', special: 'bomb' },
+  { id: 7, icon: '⚡', name: 'Rayo', special: 'ray' }
 ];
 
-export function initMatch3Grid(size = 6) {
-  const grid = [];
-  for (let i = 0; i < size * size; i++) {
-    grid.push(MATCH3_ITEMS[Math.floor(Math.random() * MATCH3_ITEMS.length)]);
-  }
-  return grid;
-}
+export const initMatch3Grid = () => {
+  return Array(36).fill(null).map(() => ({
+    ...MATCH3_ITEMS[Math.floor(Math.random() * 5)],
+    uid: Math.random()
+  }));
+};
 
-export function checkMatches(grid, size = 6) {
-  const matches = new Set();
-  
-  // Horizontal
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size - 2; c++) {
-      const idx = r * size + c;
-      if (grid[idx] && grid[idx+1] && grid[idx+2] &&
-          grid[idx].id === grid[idx+1].id && grid[idx].id === grid[idx+2].id) {
-        matches.add(idx); matches.add(idx+1); matches.add(idx+2);
-      }
-    }
-  }
-  
-  // Vertical
-  for (let c = 0; c < size; c++) {
-    for (let r = 0; r < size - 2; r++) {
-      const idx = r * size + c;
-      const idx2 = (r+1) * size + c;
-      const idx3 = (r+2) * size + c;
-      if (grid[idx] && grid[idx2] && grid[idx3] &&
-          grid[idx].id === grid[idx2].id && grid[idx].id === grid[idx3].id) {
-        matches.add(idx); matches.add(idx2); matches.add(idx3);
-      }
-    }
-  }
-  
-  return Array.from(matches);
-}
-
-export function swap(grid, idx1, idx2) {
+export const swap = (grid, idx1, idx2) => {
   const newGrid = [...grid];
   const temp = newGrid[idx1];
   newGrid[idx1] = newGrid[idx2];
   newGrid[idx2] = temp;
   return newGrid;
-}
+};
+
+export const checkMatches = (grid) => {
+  const size = 6;
+  const toRemove = new Set();
+  const powerUps = []; // {idx, type}
+
+  // Check horizontal
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size - 2; c++) {
+      const idx = r * size + c;
+      const type = grid[idx]?.id;
+      if (type && type <= 5 && grid[idx+1]?.id === type && grid[idx+2]?.id === type) {
+        let count = 3;
+        while(c + count < size && grid[idx + count]?.id === type) count++;
+        
+        for(let i=0; i<count; i++) toRemove.add(idx + i);
+        
+        if (count === 4) powerUps.push({ idx, type: 'bomb' });
+        if (count >= 5) powerUps.push({ idx, type: 'ray' });
+        
+        c += count - 1;
+      }
+    }
+  }
+
+  // Check vertical
+  for (let c = 0; c < size; c++) {
+    for (let r = 0; r < size - 2; r++) {
+      const idx = r * size + c;
+      const type = grid[idx]?.id;
+      if (type && type <= 5 && grid[idx+size]?.id === type && grid[idx+size*2]?.id === type) {
+        let count = 3;
+        while(r + count < size && grid[(r+count)*size + c]?.id === type) count++;
+        
+        for(let i=0; i<count; i++) toRemove.add((r+i)*size + c);
+        
+        if (count === 4) powerUps.push({ idx, type: 'bomb' });
+        if (count >= 5) powerUps.push({ idx, type: 'ray' });
+        
+        r += count - 1;
+      }
+    }
+  }
+
+  return { matches: Array.from(toRemove), powerUps };
+};
