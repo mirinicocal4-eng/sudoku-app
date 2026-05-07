@@ -80,6 +80,12 @@ export const MergeGame = ({ level, onWin, onExit }) => {
             setGrid(newGrid);
           }
         }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={() => {
+          const newGrid = [...grid];
+          newGrid[0] = { ...MERGE_ITEMS[4], instanceId: Math.random() }; // Item Final (id: 5)
+          setGrid(newGrid);
+          onWin();
+        }} style={{background:'var(--noir-red)', color:'white'}}>🏁 RESOLVER</button>
         <button className="btn" onClick={onExit}>ABANDONAR</button>
       </div>
     </div>

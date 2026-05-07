@@ -1,18 +1,38 @@
 export const MATCH3_ITEMS = [
-  { id: 1, icon: '📜', name: 'Documento' },
+  { id: 1, icon: '👣', name: 'Huella' },
   { id: 2, icon: '📞', name: 'Llamada' },
   { id: 3, icon: '💰', name: 'Soborno' },
   { id: 4, icon: '🚬', name: 'Cigarrillo' },
   { id: 5, icon: '🧊', name: 'Prueba' },
-  { id: 6, icon: '💣', name: 'Bomba', special: 'bomb' },
-  { id: 7, icon: '⚡', name: 'Rayo', special: 'ray' }
+  { id: 6, icon: '📚', name: 'Libro' },
+  { id: 7, icon: '⏰', name: 'Reloj' },
+  { id: 8, icon: '💣', name: 'Bomba', special: 'bomb' },
+  { id: 9, icon: '⚡', name: 'Rayo', special: 'ray' },
+  { id: 10, icon: '📦', name: 'Caja', obstacle: 'crate' },
+  { id: 11, icon: '❄️', name: 'Hielo', obstacle: 'ice' },
+  { id: 12, icon: '⛓️', name: 'Cadena', obstacle: 'chain' },
+  { id: 13, icon: '💎', name: 'Diamante Perdido', collectible: true }
 ];
 
-export const initMatch3Grid = () => {
-  return Array(36).fill(null).map(() => ({
-    ...MATCH3_ITEMS[Math.floor(Math.random() * 5)],
-    uid: Math.random()
-  }));
+const NORMAL_MAX_ID = 7;
+const OBSTACLE_IDS = [10, 11, 12];
+
+export const initMatch3Grid = (level = 1) => {
+  return Array(36).fill(null).map((_, i) => {
+    // Spawneo de Diamante Perdido (solo en fila superior y con baja probabilidad)
+    if (i < 6 && Math.random() < 0.05) {
+      return { ...MATCH3_ITEMS[12], uid: Math.random() };
+    }
+    const isObstacle = Math.random() < (0.1 + (level * 0.02));
+    if (isObstacle) {
+      const obsType = OBSTACLE_IDS[Math.floor(Math.random() * OBSTACLE_IDS.length)];
+      return { ...MATCH3_ITEMS[obsType - 1], uid: Math.random() };
+    }
+    return {
+      ...MATCH3_ITEMS[Math.floor(Math.random() * 5)],
+      uid: Math.random()
+    };
+  });
 };
 
 export const swap = (grid, idx1, idx2) => {
@@ -33,7 +53,7 @@ export const checkMatches = (grid) => {
     for (let c = 0; c < size - 2; c++) {
       const idx = r * size + c;
       const type = grid[idx]?.id;
-      if (type && type <= 5 && grid[idx+1]?.id === type && grid[idx+2]?.id === type) {
+      if (type && type <= NORMAL_MAX_ID && grid[idx+1]?.id === type && grid[idx+2]?.id === type) {
         let count = 3;
         while(c + count < size && grid[idx + count]?.id === type) count++;
         
@@ -52,7 +72,7 @@ export const checkMatches = (grid) => {
     for (let r = 0; r < size - 2; r++) {
       const idx = r * size + c;
       const type = grid[idx]?.id;
-      if (type && type <= 5 && grid[idx+size]?.id === type && grid[idx+size*2]?.id === type) {
+      if (type && type <= NORMAL_MAX_ID && grid[idx+size]?.id === type && grid[idx+size*2]?.id === type) {
         let count = 3;
         while(r + count < size && grid[(r+count)*size + c]?.id === type) count++;
         

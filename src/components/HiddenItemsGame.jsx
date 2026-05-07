@@ -179,6 +179,10 @@ export const HiddenItemsGame = ({ level, onWin, onExit }) => {
             }
           }
         }} style={{fontSize: '0.8rem', background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={() => {
+          setItems(prev => prev.map(it => ({...it, found: true})));
+          onWin();
+        }} style={{background:'var(--noir-red)', color:'white'}}>🏁 RESOLVER</button>
         <button className="btn" onClick={onExit} style={{fontSize: '0.8rem'}}>ABANDONAR</button>
       </div>
     </div>

@@ -8,10 +8,10 @@ const PALABRAS_POOL = [
 ];
 
 export function generateWordSearch(difficulty = 'easy') {
-  const size = difficulty === 'easy' ? 10 : 12;
+  const size = difficulty === 'easy' ? 12 : 14;
   const grid = Array(size).fill(null).map(() => Array(size).fill(''));
 
-  const wordCount = difficulty === 'easy' ? 4 : 6;
+  const wordCount = difficulty === 'easy' ? 6 : 8;
   const words = [...PALABRAS_POOL]
     .sort(() => Math.random() - 0.5)
     .slice(0, wordCount);

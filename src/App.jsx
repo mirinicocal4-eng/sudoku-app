@@ -17,6 +17,15 @@ import { MergeGame } from './components/MergeGame';
 import { PuzzleGame } from './components/PuzzleGame';
 import { HiddenItemsGame } from './components/HiddenItemsGame';
 
+const REGLAS_JUEGOS = {
+  hidden: "Busca y pulsa sobre los objetos de la lista que están camuflados en el escenario.",
+  sudoku: "Completa el tablero. No puedes repetir números del 1 al 9 en la misma fila, columna o región 3x3.",
+  wordsearch: "Busca las palabras de la lista en la sopa de letras. Pulsa las letras una a una para formarlas.",
+  merge: "Combina dos objetos iguales arrastrándolos uno sobre otro para crear uno de nivel superior.",
+  match3: "Alinea 3 o más objetos iguales para eliminarlos y sumar puntos antes de agotar tus movimientos.",
+  puzzle: "Reconstruye la imagen arrastrando las piezas a sus posiciones correctas."
+};
+
 const NARRATIVAS = [
   "Una llamada anónima nos alerta de movimientos extraños en la zona. Empezamos la vigilancia.",
   "Hemos encontrado rastros físicos en el lugar. Necesitamos analizar estas pruebas con cuidado.",
@@ -376,11 +385,15 @@ function App() {
           "{info.desc}"
         </div>
         {activeDialogue && (
-          <div style={{fontSize: '0.75rem', opacity: 0.9, borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'5px'}}>
+          <div style={{fontSize: '0.75rem', opacity: 0.9, borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'5px', marginBottom:'5px'}}>
             <span style={{color:'gold', fontWeight:'bold', marginRight:'10px'}}>INSTRUCCIÓN:</span> 
             {activeDialogue}
           </div>
         )}
+        <div style={{fontSize: '0.7rem', opacity: 0.7, borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'5px'}}>
+          <span style={{color:'#00d1ff', fontWeight:'bold', marginRight:'10px'}}>REGLAS:</span> 
+          {REGLAS_JUEGOS[gameType]}
+        </div>
       </div>
 
       <h1 className="title" style={{textTransform:'uppercase', letterSpacing:'4px', marginTop:0}}>{gameType}</h1>

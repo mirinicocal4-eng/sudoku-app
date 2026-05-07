@@ -78,17 +78,29 @@ export const WordSearchGame = ({ level, onWin, onExit }) => {
             );
           }))}
         </div>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ color: 'gold', fontSize: '0.9rem', marginBottom: '10px' }}>EVIDENCIAS A BUSCAR:</h3>
+        <div style={{ 
+          flex: 1, 
+          background: 'rgba(0,0,0,0.4)', 
+          padding: '15px', 
+          borderRadius: '8px', 
+          border: '1px solid gold',
+          minWidth: '150px'
+        }}>
+          <h3 style={{ color: 'gold', fontSize: '1rem', marginBottom: '15px', borderBottom: '1px solid gold', paddingBottom: '5px' }}>EVIDENCIAS:</h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {data.words.map(w => (
               <li key={w.word} style={{ 
-                fontSize: '0.8rem', 
-                color: foundWords.includes(w.word) ? 'rgba(255,255,255,0.3)' : 'white',
+                fontSize: '1rem', 
+                color: foundWords.includes(w.word) ? '#00ff00' : '#fff',
                 textDecoration: foundWords.includes(w.word) ? 'line-through' : 'none',
-                marginBottom: '5px'
+                marginBottom: '10px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
-                {foundWords.includes(w.word) ? '✅' : '❓'} {w.word}
+                <span style={{fontSize:'1.2rem'}}>{foundWords.includes(w.word) ? '✅' : '🔍'}</span> 
+                {w.word.toUpperCase()}
               </li>
             ))}
           </ul>
@@ -119,6 +131,10 @@ export const WordSearchGame = ({ level, onWin, onExit }) => {
             }
           }
         }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={() => {
+          setFoundWords(data.words.map(w => w.word));
+          onWin();
+        }} style={{background:'var(--noir-red)', color:'white'}}>🏁 RESOLVER</button>
         <button className="btn" onClick={onExit}>ABANDONAR</button>
       </div>
     </div>

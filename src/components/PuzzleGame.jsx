@@ -82,6 +82,11 @@ export const PuzzleGame = ({ level, onWin, onExit }) => {
             if (newGrid.every((it, idx) => it.id === idx)) onWin();
           }
         }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={() => {
+          const solved = grid.map((it, i) => ({...it, id: i})).sort((a,b)=>a.id-b.id);
+          setGrid(solved);
+          onWin();
+        }} style={{background:'var(--noir-red)', color:'white'}}>🏁 RESOLVER</button>
         <button className="btn" onClick={onExit}>ABANDONAR</button>
       </div>
     </div>

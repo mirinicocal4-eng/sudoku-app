@@ -65,6 +65,10 @@ export const SudokuGame = ({ level, onWin, onExit }) => {
               if (isWin(newBoard, solution)) onWin();
             }
           }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+          <button className="btn" onClick={() => {
+            setBoard(solution);
+            onWin();
+          }} style={{background:'var(--noir-red)', color:'white'}}>🏁 RESOLVER</button>
           <button className="btn" onClick={onExit}>ABANDONAR</button>
         </div>
       </div>
