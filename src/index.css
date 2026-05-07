@@ -1,17 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;700&display=swap');
 
 :root {
-  --noir-black: #0c0c0c;
-  --noir-paper: #dcd7c9;
-  --noir-ink: #2c2c2c;
-  --noir-red: #8b0000;
-  --noir-shadow: rgba(0, 0, 0, 0.4);
-  --text: #2c2c2c;
+  --noir-black: #1a1c2c;
+  --noir-paper: #f4f4f9;
+  --noir-ink: #333652;
+  --noir-red: #ff3e3e;
+  --noir-blue: #4d94ff;
+  --noir-shadow: rgba(0, 0, 0, 0.2);
+  --text: #333652;
 }
 
 body {
   margin: 0;
-  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-family: 'Inter', sans-serif;
   background: radial-gradient(circle at center, #1a1a1a, #050505);
   color: var(--text);
   min-height: 100vh;
@@ -34,7 +35,8 @@ body {
 }
 
 .title {
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   font-size: 3.5rem;
   color: #fff;
   text-shadow: 2px 2px 0px var(--noir-red), 4px 4px 10px #000;
@@ -80,7 +82,8 @@ body {
   justify-content: center;
   align-items: center;
   font-size: 1.5rem;
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   cursor: pointer;
   transition: all 0.2s;
   color: var(--noir-ink);
@@ -131,7 +134,8 @@ body {
   border: none;
   padding: 0.8rem;
   font-size: 1.2rem;
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   cursor: pointer;
   border-radius: 2px;
   transition: all 0.2s;
@@ -153,8 +157,8 @@ body {
   border: 2px solid var(--noir-ink);
   background: transparent;
   color: var(--noir-ink);
-  font-family: 'Special Elite', serif;
-  font-weight: bold;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.2s;
@@ -185,7 +189,8 @@ body {
   color: #aaa;
   padding: 0.5rem 1rem;
   cursor: pointer;
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   font-size: 1.1rem;
 }
 
@@ -202,7 +207,8 @@ body {
   border-left: 5px solid var(--noir-red);
   margin-bottom: 2rem;
   text-align: left;
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   line-height: 1.6;
 }
 
@@ -216,7 +222,8 @@ body {
   font-weight: bold;
   transform: rotate(-15deg);
   opacity: 0.7;
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   pointer-events: none;
 }
 
@@ -296,7 +303,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   font-size: 1.4rem;
   background: var(--noir-paper);
   color: var(--noir-ink);
@@ -330,7 +338,8 @@ body {
   padding: 5px 10px;
   background: var(--noir-paper);
   border: 1px solid var(--noir-ink);
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   color: var(--noir-ink);
   text-transform: uppercase;
 }
@@ -452,7 +461,8 @@ body {
 }
 
 .card-item .card-title {
-  font-family: 'Special Elite', serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   font-size: 0.9rem;
   font-weight: bold;
 }
@@ -515,7 +525,7 @@ body {
   border-radius: 15px;
   padding: 20px;
   width: 260px;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 1.1rem;
   font-weight: bold;
   color: #000;
