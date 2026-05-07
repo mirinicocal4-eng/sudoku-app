@@ -1,43 +1,56 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateBoard, isWin } from './utils/sudokuLogic';
 
-const CASOS = {
-  easy: {
-    titulo: "CASO #042: EL ROBO DEL RUBÍ",
-    descripcion: "Un ladrón de guante blanco ha dejado una nota cifrada tras el robo en la joyería. Si desciframos este código, sabremos su próximo movimiento antes de que sea tarde.",
-    sello: "ABIERTO"
-  },
-  medium: {
-    titulo: "CASO #109: MISTERIO EN EL PUERTO",
-    descripcion: "Un estibador ha desaparecido. La única pista es un sudoku manchado de café en su taquilla. Los números esconden una dirección que no podemos ignorar.",
-    sello: "PRIORITARIO"
-  },
-  hard: {
-    titulo: "CASO #256: LA CONSPIRACIÓN",
-    descripcion: "Documentos de alto secreto han sido interceptados. Están protegidos por un cifrado de máxima seguridad. Si fallamos, el escándalo hundirá a la ciudad.",
-    sello: "CONFIDENCIAL"
-  }
-};
+const TITULOS = [
+  "El Robo del", "El Misterio de", "La Desaparición en", "El Enigma de", "La Conspiración de", 
+  "El Secreto de", "El Chantaje en", "La Sombra sobre", "El Código de", "El Golpe a"
+];
+const OBJETOS = [
+  "Diamante", "Puerto", "Mansión", "Reloj de Arena", "Mafia", 
+  "Senador", "Caja Fuerte", "Calle 42", "Biblioteca", "Expediente"
+];
 
 function App() {
-  const [view, setView] = useState('menu'); // 'menu', 'game'
-  const [difficulty, setDifficulty] = useState('easy');
+  const [view, setView] = useState('menu');
+  const [level, setLevel] = useState(1);
+  const [unlockedLevel, setUnlockedLevel] = useState(1);
   const [board, setBoard] = useState(Array(9).fill(null).map(() => Array(9).fill(0)));
   const [initialBoard, setInitialBoard] = useState(Array(9).fill(null).map(() => Array(9).fill(0)));
   const [solution, setSolution] = useState([]);
   const [selectedCell, setSelectedCell] = useState(null);
   const [gameStatus, setGameStatus] = useState('playing');
 
-  const startNewGame = useCallback((diff = difficulty) => {
+  // Cargar progreso al inicio
+  useEffect(() => {
+    const saved = localStorage.getItem('noir-progress');
+    if (saved) setUnlockedLevel(parseInt(saved));
+  }, []);
+
+  const getCaseInfo = (lvl) => {
+    const titleIdx = (lvl - 1) % TITULOS.length;
+    const objIdx = (lvl - 1) % OBJETOS.length;
+    return {
+      titulo: `CASO #${lvl}: ${TITULOS[titleIdx]} ${OBJETOS[objIdx]}`,
+      descripcion: `La ciudad no descansa. El informe del caso #${lvl} indica actividad sospechosa. Debes descifrar el código para avanzar en la investigación.`,
+      sello: lvl <= 5 ? "ABIERTO" : lvl <= 15 ? "PRIORITARIO" : "CONFIDENCIAL"
+    };
+  };
+
+  const startNewGame = useCallback((lvl) => {
+    // La dificultad sube cada 5 niveles
+    let diff = 'easy';
+    if (lvl > 5) diff = 'medium';
+    if (lvl > 15) diff = 'hard';
+
     const { initial, solution: sol } = generateBoard(diff);
     setBoard(initial.map(row => [...row]));
     setInitialBoard(initial.map(row => [...row]));
     setSolution(sol);
-    setDifficulty(diff);
+    setLevel(lvl);
     setSelectedCell(null);
     setGameStatus('playing');
     setView('game');
-  }, [difficulty]);
+  }, []);
 
   const handleCellClick = (r, c) => {
     if (initialBoard[r][c] !== 0) return;
@@ -53,6 +66,11 @@ function App() {
 
     if (isWin(newBoard, solution)) {
       setGameStatus('won');
+      const nextLvl = level + 1;
+      if (nextLvl > unlockedLevel) {
+        setUnlockedLevel(nextLvl);
+        localStorage.setItem('noir-progress', nextLvl.toString());
+      }
     }
   };
 
@@ -60,13 +78,20 @@ function App() {
     return (
       <div className="app-container">
         <h1 className="title">EXPEDIENTES NOIR</h1>
-        <div className="game-card" style={{maxWidth: '500px', margin: '0 auto'}}>
-          <div className="stamp">DESPACHO</div>
-          <p style={{marginBottom: '2rem', fontSize: '1.2rem'}}>Seleccione un expediente para comenzar la investigación:</p>
-          <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-            {Object.keys(CASOS).map(d => (
-              <button key={d} className="btn" onClick={() => startNewGame(d)}>
-                {CASOS[d].titulo}
+        <div className="game-card" style={{maxWidth: '600px', margin: '0 auto'}}>
+          <div className="stamp">ARCHIVOS</div>
+          <p style={{marginBottom: '2rem'}}>Casos resueltos: {unlockedLevel - 1}</p>
+          <div style={{
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', 
+            gap: '1rem',
+            maxHeight: '400px',
+            overflowY: 'auto',
+            padding: '10px'
+          }}>
+            {Array.from({length: unlockedLevel}, (_, i) => i + 1).map(lvl => (
+              <button key={lvl} className="btn" onClick={() => startNewGame(lvl)}>
+                Caso #{lvl}
               </button>
             ))}
           </div>
@@ -75,17 +100,19 @@ function App() {
     );
   }
 
+  const currentCase = getCaseInfo(level);
+
   return (
     <div className="app-container">
       <h1 className="title">LA INVESTIGACIÓN</h1>
       
       <div className="narrative-box">
-        <strong>{CASOS[difficulty].titulo}</strong>
-        <p>{CASOS[difficulty].descripcion}</p>
+        <strong>{currentCase.titulo}</strong>
+        <p>{currentCase.descripcion}</p>
       </div>
 
       <div className="game-card">
-        <div className="stamp">{CASOS[difficulty].sello}</div>
+        <div className="stamp">{currentCase.sello}</div>
         <div className="sudoku-grid">
           {board.map((row, r) => (
             row.map((cell, c) => {
@@ -116,15 +143,18 @@ function App() {
 
           <div className="action-buttons">
             <button className="btn btn-primary" onClick={() => setView('menu')}>Cerrar Expediente</button>
-            <button className="btn" style={{background: '#eee'}} onClick={() => startNewGame()}>Reiniciar</button>
+            <button className="btn" style={{background: '#eee'}} onClick={() => startNewGame(level)}>Reiniciar</button>
           </div>
         </div>
       </div>
 
       {gameStatus === 'won' && (
-        <div className="narrative-box" style={{borderColor: 'var(--accent)', marginTop: '2rem'}}>
-          <strong>¡CASO RESUELTO!</strong>
-          <p>Has descifrado el código. La ciudad vuelve a estar a salvo... por ahora. El informe ha sido enviado a central.</p>
+        <div className="narrative-box" style={{borderColor: '#10b981', marginTop: '2rem'}}>
+          <strong>¡CASO #{level} RESUELTO!</strong>
+          <p>Excelente trabajo, detective. El código ha sido descifrado. El Caso #{level + 1} ya está disponible en tu despacho.</p>
+          <button className="btn btn-primary" style={{marginTop: '1rem'}} onClick={() => startNewGame(level + 1)}>
+            Siguiente Caso
+          </button>
         </div>
       )}
     </div>
