@@ -69,8 +69,18 @@ export const MergeGame = ({ level, onWin, onExit }) => {
           </div>
         ))}
       </div>
-      <div className="controls" style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button className="btn btn-primary" onClick={onExit}>SALIR</button>
+      <div className="controls" style={{ marginTop: '20px', textAlign: 'center', display:'flex', justifyContent:'center', gap:'10px' }}>
+        <button className="btn" onClick={() => {
+          const emptyIndices = grid.map((it, i) => it === null ? i : -1).filter(i => i !== -1);
+          if (emptyIndices.length > 0) {
+            const targetIdx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            const newItem = { ...MERGE_ITEMS[1], instanceId: Math.random() }; // Item Nivel 2
+            const newGrid = [...grid];
+            newGrid[targetIdx] = newItem;
+            setGrid(newGrid);
+          }
+        }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={onExit}>ABANDONAR</button>
       </div>
     </div>
   );

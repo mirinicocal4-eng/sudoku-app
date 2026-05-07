@@ -56,8 +56,25 @@ export const Match3Game = ({ level, onWin, onExit }) => {
           </div>
         ))}
       </div>
-      <div className="controls" style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button className="btn btn-primary" onClick={onExit}>SALIR</button>
+      <div className="controls" style={{ marginTop: '20px', textAlign: 'center', display:'flex', justifyContent:'center', gap:'10px' }}>
+        <button className="btn" onClick={() => {
+          if (moves <= 0) return;
+          const randomRow = Math.floor(Math.random() * 6);
+          const newGrid = [...grid];
+          // Clear row (6 items)
+          for(let i=0; i<6; i++) {
+            const idx = randomRow * 6 + i;
+            newGrid[idx] = { ...MATCH3_ITEMS[Math.floor(Math.random() * MATCH3_ITEMS.length)], uid: Math.random() };
+          }
+          setGrid(newGrid);
+          setScore(s => {
+            const next = s + 60;
+            if (next >= targetScore) onWin();
+            return next;
+          });
+          setMoves(m => m - 1);
+        }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={onExit}>ABANDONAR</button>
       </div>
     </div>
   );

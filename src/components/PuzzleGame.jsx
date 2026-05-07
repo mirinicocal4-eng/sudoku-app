@@ -61,8 +61,28 @@ export const PuzzleGame = ({ level, onWin, onExit }) => {
           />
         ))}
       </div>
-      <div className="controls" style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button className="btn btn-primary" onClick={onExit}>SALIR</button>
+      <div className="controls" style={{ marginTop: '20px', textAlign: 'center', display:'flex', justifyContent:'center', gap:'10px' }}>
+        <button className="btn" onClick={() => {
+          const incorrect = grid.map((item, i) => ({item, i})).filter(x => x.item.id !== x.i);
+          if (incorrect.length > 0) {
+            const randomPick = incorrect[Math.floor(Math.random() * incorrect.length)];
+            const targetId = randomPick.i;
+            const currentItemAtTarget = grid[targetId];
+            
+            // Find where the piece that SHOULD be at targetId is currently located
+            const actualSourceIdx = grid.findIndex(x => x.id === targetId);
+            
+            const newGrid = [...grid];
+            // Swap
+            const temp = newGrid[targetId];
+            newGrid[targetId] = newGrid[actualSourceIdx];
+            newGrid[actualSourceIdx] = temp;
+            
+            setGrid(newGrid);
+            if (newGrid.every((it, idx) => it.id === idx)) onWin();
+          }
+        }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={onExit}>ABANDONAR</button>
       </div>
     </div>
   );

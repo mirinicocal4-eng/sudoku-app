@@ -163,7 +163,22 @@ export const HiddenItemsGame = ({ level, onWin, onExit }) => {
         ))}
       </div>
 
-      <div style={{ marginTop: '15px', textAlign: 'center' }}>
+      <div style={{ marginTop: '15px', textAlign: 'center', display:'flex', justifyContent:'center', gap:'15px' }}>
+        <button className="btn" onClick={() => {
+          const unfound = items.filter(it => !it.found);
+          if (unfound.length > 0) {
+            const randomItem = unfound[Math.floor(Math.random() * unfound.length)];
+            const el = document.getElementById(`hidden-item-${randomItem.id}`);
+            if (el) {
+              el.style.filter = 'grayscale(0) brightness(2) contrast(2) drop-shadow(0 0 10px gold)';
+              el.style.transform = 'scale(1.5)';
+              setTimeout(() => {
+                el.style.filter = 'grayscale(0.8) contrast(1.2) opacity(0.5) sepia(0.3) drop-shadow(0 0 1px black)';
+                el.style.transform = `scale(0.8) rotate(${randomItem.rotation}deg)`;
+              }, 2000);
+            }
+          }
+        }} style={{fontSize: '0.8rem', background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
         <button className="btn" onClick={onExit} style={{fontSize: '0.8rem'}}>ABANDONAR</button>
       </div>
     </div>

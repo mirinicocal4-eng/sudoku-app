@@ -79,6 +79,7 @@ function App() {
   const [infiniteEnergyTime, setInfiniteEnergyTime] = useState(0);
   const [evidence, setEvidence] = useState([]);
   const [showReward, setShowReward] = useState(null);
+  const [activeDialogue, setActiveDialogue] = useState("");
   
   // Temporizador de Energía Infinita (Turbo)
   useEffect(() => {
@@ -144,9 +145,7 @@ function App() {
   // --- LOGIC ---
   const startEvent = () => {
     const ev = activeEvent;
-    setGameType(ev.type);
-    setShowReward(null);
-    setView('game');
+    startNewGame(currentCase, ev.type, ev.msg);
   };
 
   const getCaseInfo = (caseIdx, step) => {
@@ -192,12 +191,13 @@ function App() {
     );
   };
 
-  const startNewGame = (caseIdx, type) => {
+  const startNewGame = (caseIdx, type, dialogue = "") => {
     const isFree = isTestMode || infiniteEnergyTime > 0;
     if (!isFree && energy < 20) { alert("Agotado."); return; }
     if (!isFree) setEnergy(e => { localStorage.setItem('noir-energy', e-20); return e-20; });
     
-    setThought(""); // Desaparece la frase al iniciar el juego
+    setThought(""); 
+    setActiveDialogue(dialogue);
     setGameType(type); 
     setShowReward(null);
     setView('game');
@@ -356,10 +356,34 @@ function App() {
   );
 
   // View Game
+  const info = getCaseInfo(currentCase, currentStep);
   return (
-    <div className="app-container" style={{paddingLeft: '420px'}}>
+    <div className="app-container" style={{paddingLeft: '420px', paddingTop:'70px'}}>
       <Detective thought={thought} />
-      <h1 className="title" style={{textTransform:'uppercase', letterSpacing:'4px'}}>{gameType}</h1>
+      
+      {/* Narrativa y Diálogo del Personaje durante el juego */}
+      <div style={{
+        background: 'var(--noir-ink)',
+        color: '#fff',
+        padding: '12px 20px',
+        borderRadius: '8px',
+        marginBottom: '20px',
+        borderLeft: '4px solid var(--noir-red)',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+      }}>
+        <div style={{fontSize: '0.85rem', fontStyle: 'italic', marginBottom:'5px'}}>
+          <span style={{color:'var(--noir-red)', fontWeight:'bold', marginRight:'10px'}}>INFORME:</span> 
+          "{info.desc}"
+        </div>
+        {activeDialogue && (
+          <div style={{fontSize: '0.75rem', opacity: 0.9, borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'5px'}}>
+            <span style={{color:'gold', fontWeight:'bold', marginRight:'10px'}}>INSTRUCCIÓN:</span> 
+            {activeDialogue}
+          </div>
+        )}
+      </div>
+
+      <h1 className="title" style={{textTransform:'uppercase', letterSpacing:'4px', marginTop:0}}>{gameType}</h1>
       <div className="game-card">
         {gameType === 'sudoku' && <SudokuGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
         {gameType === 'match3' && <Match3Game level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}

@@ -52,7 +52,19 @@ export const SudokuGame = ({ level, onWin, onExit }) => {
             <button key={n} className="num-btn" onClick={() => handleNumberInput(n)}>{n}</button>
           ))}
         </div>
-        <div style={{marginTop: '20px', textAlign: 'center'}}>
+        <div style={{marginTop: '20px', textAlign: 'center', display:'flex', justifyContent:'center', gap:'10px'}}>
+          <button className="btn" onClick={() => {
+            const emptyCells = [];
+            board.forEach((row, r) => row.forEach((cell, c) => {
+              if (cell === 0) emptyCells.push({r, c});
+            }));
+            if (emptyCells.length > 0) {
+              const {r, c} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+              const newBoard = board.map((row, ri) => row.map((cell, ci) => (ri === r && ci === c) ? solution[r][c] : cell));
+              setBoard(newBoard);
+              if (isWin(newBoard, solution)) onWin();
+            }
+          }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
           <button className="btn" onClick={onExit}>ABANDONAR</button>
         </div>
       </div>

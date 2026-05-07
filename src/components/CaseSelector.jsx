@@ -29,14 +29,25 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
           <div style={{margin:'10px 0', padding:'5px', background:'var(--noir-ink)', color:'gold', fontSize:'0.7rem', textAlign:'center', borderRadius:'4px'}}>
             👤 SOSPECHOSO: <span style={{fontWeight:'bold', textTransform:'uppercase'}}>{info.sospechoso.name}</span>
           </div>
-          <p style={{margin:'15px 0', fontSize:'0.85rem', lineHeight:'1.4'}}>{info.desc}</p>
+          <div style={{
+            margin: '20px 0',
+            padding: '20px',
+            background: 'rgba(0,0,0,0.03)',
+            borderLeft: '4px solid var(--noir-red)',
+            borderRadius: '4px',
+            fontStyle: 'italic',
+            position: 'relative'
+          }}>
+            <span style={{position:'absolute', top:'-10px', left:'10px', background:'var(--noir-red)', color:'white', fontSize:'0.6rem', padding:'2px 8px', borderRadius:'4px', fontStyle:'normal', fontWeight:'bold'}}>INFORME DE MISIÓN</span>
+            <p style={{margin:0, fontSize:'0.95rem', lineHeight:'1.5', color:'var(--noir-ink)'}}>"{info.desc}"</p>
+          </div>
           <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
             {available.map(t => {
               const char = PERSONAJES[GAME_ASIG[t]];
               return (
                 <button key={t} className="btn" onClick={() => {
                   speak(char.text, isMuted, char.gender);
-                  startNewGame(caseIdx, t);
+                  startNewGame(caseIdx, t, char.text);
                 }} style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                   <span>{labels[t]}</span>
                   <span style={{fontSize:'0.7rem', opacity:0.7}}>{char.name}</span>

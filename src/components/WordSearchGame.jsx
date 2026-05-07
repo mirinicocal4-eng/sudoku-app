@@ -94,8 +94,32 @@ export const WordSearchGame = ({ level, onWin, onExit }) => {
           </ul>
         </div>
       </div>
-      <div className="controls" style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button className="btn btn-primary" onClick={onExit}>SALIR</button>
+      <div className="controls" style={{ marginTop: '20px', textAlign: 'center', display:'flex', justifyContent:'center', gap:'10px' }}>
+        <button className="btn" onClick={() => {
+          const unfound = data.words.filter(w => !foundWords.includes(w.word));
+          if (unfound.length > 0) {
+            const word = unfound[Math.floor(Math.random() * unfound.length)];
+            const firstPos = word.positions[0]; // Format "r-c"
+            const cells = document.querySelectorAll('.wordsearch-grid > div');
+            // Find the cell index (flat array from grid map)
+            const [tr, tc] = firstPos.split('-').map(Number);
+            const gridWidth = data.grid[0].length;
+            const index = tr * gridWidth + tc;
+            const target = cells[index];
+            if (target) {
+              const originalBg = target.style.background;
+              target.style.background = 'gold';
+              target.style.color = 'black';
+              target.style.transform = 'scale(1.2)';
+              setTimeout(() => {
+                target.style.background = originalBg;
+                target.style.color = 'white';
+                target.style.transform = 'scale(1)';
+              }, 2000);
+            }
+          }
+        }} style={{background:'var(--noir-ink)', color:'gold'}}>💡 PISTA</button>
+        <button className="btn" onClick={onExit}>ABANDONAR</button>
       </div>
     </div>
   );
