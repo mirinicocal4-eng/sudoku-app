@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap');
+
+:root {
+  --noir-black: #0c0c0c;
+  --noir-paper: #dcd7c9;
+  --noir-ink: #2c2c2c;
+  --noir-red: #8b0000;
+  --noir-shadow: rgba(0, 0, 0, 0.4);
+  --text: #2c2c2c;
+}
+
+body {
+  margin: 0;
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  background: radial-gradient(circle at center, #1a1a1a, #050505);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.title {
+  font-family: 'Special Elite', serif;
+  font-size: 3.5rem;
+  color: #fff;
+  text-shadow: 2px 2px 0px var(--noir-red), 4px 4px 10px #000;
+  margin-bottom: 3rem;
+  letter-spacing: 2px;
+}
+
+.game-card {
+  background: var(--noir-paper);
+  padding: 2rem;
+  border-radius: 4px;
+  box-shadow: 10px 10px 0px rgba(0,0,0,0.5), 
+              inset 0 0 100px rgba(0,0,0,0.1);
+  position: relative;
+  border: 1px solid #b5af9a;
+}
+
+/* Efecto de mancha de café */
+.game-card::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(78, 52, 37, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  aspect-ratio: 1/1;
+  width: 100%;
+  max-width: 450px;
+}
+
+.cell {
+  aspect-ratio: 1/1;
+  background: var(--noir-paper);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-family: 'Special Elite', serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--noir-ink);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  user-select: none;
+}
+
+.cell:nth-child(3n) { border-right: 2px solid var(--noir-ink); }
+.cell:nth-child(9n) { border-right: 0.5px solid rgba(0,0,0,0.1); }
+
+.sudoku-grid > div:nth-child(n+19):nth-child(-n+27),
+.sudoku-grid > div:nth-child(n+46):nth-child(-n+54) {
+  border-bottom: 2px solid var(--noir-ink);
+}
+
+.cell.selected {
+  background: rgba(139, 0, 0, 0.15);
+  outline: 2px solid var(--noir-red);
+  z-index: 10;
+}
+
+.cell.initial {
+  color: #000;
+  font-weight: 900;
+}
+
+.cell.wrong {
+  color: var(--noir-red);
+  background: rgba(139, 0, 0, 0.1);
+}
+
+.controls {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.number-pad {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.num-btn {
+  background: var(--noir-ink);
+  color: var(--noir-paper);
+  border: none;
+  padding: 0.8rem;
+  font-size: 1.2rem;
+  font-family: 'Special Elite', serif;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.num-btn:hover {
+  background: #444;
+  transform: translateY(-2px);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn {
+  padding: 0.8rem 1.5rem;
+  border: 2px solid var(--noir-ink);
+  background: transparent;
+  color: var(--noir-ink);
+  font-family: 'Special Elite', serif;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--noir-red);
+  color: white;
+  border-color: var(--noir-red);
+}
+
+.btn:hover {
+  filter: brightness(1.2);
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+}
+
+.difficulty-selector {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.diff-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #aaa;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-family: 'Special Elite', serif;
+  font-size: 1.1rem;
+}
+
+.diff-btn.active {
+  color: var(--noir-red);
+  border-bottom-color: var(--noir-red);
+}
+
+/* Narrativa */
+.narrative-box {
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 2rem;
+  border-left: 5px solid var(--noir-red);
+  margin-bottom: 2rem;
+  text-align: left;
+  font-family: 'Special Elite', serif;
+  line-height: 1.6;
+}
+
+.stamp {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  border: 3px solid var(--noir-red);
+  color: var(--noir-red);
+  padding: 5px 10px;
+  font-weight: bold;
+  transform: rotate(-15deg);
+  opacity: 0.7;
+  font-family: 'Special Elite', serif;
+  pointer-events: none;
+}
+
+@media (max-width: 500px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .cell {
+    font-size: 1.2rem;
+  }
+
+  .num-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}
