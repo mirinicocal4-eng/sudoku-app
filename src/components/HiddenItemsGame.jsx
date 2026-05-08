@@ -60,7 +60,7 @@ const ESCENAS_DATA = {
 
 const ESCENAS_KEYS = Object.keys(ESCENAS_DATA);
 
-export const HiddenItemsGame = ({ level, onWin, onExit }) => {
+export const HiddenItemsGame = ({ level, onWin, onExit, playSFX }) => {
   const [items, setItems] = useState([]);
   const sceneKey = ESCENAS_KEYS[level % ESCENAS_KEYS.length];
   const sceneData = ESCENAS_DATA[sceneKey];
@@ -81,6 +81,7 @@ export const HiddenItemsGame = ({ level, onWin, onExit }) => {
   }, [level, sceneKey]);
 
   const handleItemClick = (id) => {
+    if (playSFX) playSFX('match');
     const nextItems = items.map(it => it.id === id ? { ...it, found: true } : it);
     setItems(nextItems);
     if (nextItems.every(it => it.found)) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { initMatch3Grid, checkMatches, swap, MATCH3_ITEMS } from '../utils/match3Logic';
 
-export const Match3Game = ({ level, onWin, onExit }) => {
+export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
   const [grid, setGrid] = useState([]);
   const [cleanedTiles, setCleanedTiles] = useState(Array(36).fill(false));
   const [lizardProgress, setLizardProgress] = useState(0);
@@ -79,6 +79,8 @@ export const Match3Game = ({ level, onWin, onExit }) => {
   const applyMatches = (currentGrid, currentScore) => {
     const { matches, powerUps } = checkMatches(currentGrid);
     if (matches.length === 0) return { grid: currentGrid, score: currentScore };
+
+    if (playSFX) playSFX('match');
 
     let newGrid = [...currentGrid];
     let addedScore = matches.length * 10;

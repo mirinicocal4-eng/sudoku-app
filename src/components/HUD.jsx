@@ -37,6 +37,7 @@ export const HUD = ({ score, energy, diamonds, infiniteEnergyTime, isMuted, setI
           <button className="hud-item" style={{padding:'5px 10px', background: infiniteEnergyTime > 0 ? 'gold' : '#444'}} onClick={()=>{ if(inventory.turbo > 0 && infiniteEnergyTime === 0) { setInfiniteEnergyTime(120); setInventory(i=>({...i, turbo:i.turbo-1})); } }}>🚀 {inventory.turbo}</button>
         </div>
         <button className="hud-item" style={{background: isTestMode ? 'var(--noir-red)' : '#444'}} onClick={() => setIsTestMode(!isTestMode)}>{isTestMode ? '🛠️ TEST' : '🎮 JUEGO'}</button>
+        <button className="hud-item" onClick={() => setMusicEnabled(!musicEnabled)}>{musicEnabled?'🎷':'🔇'}</button>
         <button className="hud-item" onClick={() => setIsMuted(!isMuted)}>{isMuted?'🔇':'🔊'}</button>
         <button className="hud-item" style={{borderRadius:'50%'}} onClick={() => setShowLogin(true)}>👤</button>
       </div>
