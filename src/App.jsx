@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 // Utils & Logic
 import { TITULOS, OBJETOS, FELICITACIONES, EVIDENCIAS_POSIBLES, SOSPECHOSOS, BARRIOS, PERSONAJES, GAME_ASIG, PUNTOS_MAPA } from './utils/constants';
 
@@ -353,7 +353,7 @@ function App() {
 
   if (view === 'menu') return (
     <div className="app-container" style={{
-      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro_1778199357053.png)',
+      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
       paddingLeft: '420px', 
       paddingTop: '70px'
     }}>
@@ -406,7 +406,7 @@ function App() {
   const info = getCaseInfo(currentCase, currentStep);
   return (
     <div className="app-container" style={{
-      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro_1778199357053.png)',
+      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
       paddingLeft: '420px', 
       paddingTop: '70px'
     }}>

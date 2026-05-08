@@ -6,7 +6,7 @@ export const CityMap = ({ unlockedCases, setCurrentCase, setView, evidenceCount,
     <>
       <h1 className="title" style={{marginTop:'20px'}}>EXPEDIENTES NOIR</h1>
       <div className="city-map-container" style={{
-        backgroundImage: 'url(/mapa_noir_pro_1778199290079.png)', 
+        backgroundImage: 'url(/mapa_noir_pro.png)', 
         height: '650px', 
         position:'relative',
         borderRadius: '24px',

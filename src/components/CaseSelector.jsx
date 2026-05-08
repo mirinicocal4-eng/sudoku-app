@@ -21,7 +21,7 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
 
   return (
     <div className="app-container" style={{
-      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro_1778199357053.png)',
+      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
       paddingLeft: '420px'
     }}>
       {renderDetective()}
