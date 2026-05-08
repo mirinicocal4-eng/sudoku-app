@@ -69,8 +69,33 @@ function App() {
   // --- STATE ---
   const [view, setView] = useState('menu');
   const [isMuted, setIsMuted] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(true);
   const [isTestMode, setIsTestMode] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
+  
+  const bgMusic = useRef(new Audio('https://www.fesliyanstudios.com/play-mp3/2405')); // Noir Jazz loop
+
+  useEffect(() => {
+    bgMusic.current.loop = true;
+    bgMusic.current.volume = 0.3;
+    if (musicEnabled) {
+      bgMusic.current.play().catch(e => console.log("Auto-play blocked"));
+    } else {
+      bgMusic.current.pause();
+    }
+  }, [musicEnabled]);
+
+  const playSFX = (type) => {
+    if (isMuted) return;
+    const sfxMap = {
+      click: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
+      win: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3',
+      match: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'
+    };
+    const audio = new Audio(sfxMap[type]);
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  };
   
   // Progression
   const [unlockedCases, setUnlockedCases] = useState(1);
@@ -79,6 +104,7 @@ function App() {
   
   const currentStep = caseSteps[currentCase] || 1;
   
+  const [completedCases, setCompletedCases] = useState([]);
   const [gameType, setGameType] = useState('sudoku');
   const [thought, setThought] = useState("");
   const [score, setScore] = useState(0);
@@ -108,11 +134,13 @@ function App() {
     const savedDiams = localStorage.getItem('noir-diamonds');
     const savedInv = localStorage.getItem('noir-inventory');
     const savedEv = localStorage.getItem('noir-evidence');
+    const savedCompleted = localStorage.getItem('noir-completed-cases');
     if (savedCases) setUnlockedCases(parseInt(savedCases));
     if (savedSteps) setCaseSteps(JSON.parse(savedSteps));
     if (savedScore) setScore(parseInt(savedScore));
     if (savedDiams) setDiamonds(parseInt(savedDiams));
     if (savedInv) setInventory(JSON.parse(savedInv));
+    if (savedCompleted) setCompletedCases(JSON.parse(savedCompleted));
     if (savedEv) setEvidence(JSON.parse(savedEv));
   }, []);
 
@@ -253,25 +281,20 @@ function App() {
       if (currentCase === unlockedCases) {
         setUnlockedCases(prev => { localStorage.setItem('noir-cases', prev + 1); return prev + 1; });
       }
-      setCaseSteps(prev => {
-        const next = { ...prev, [currentCase]: 1 };
-        localStorage.setItem('noir-case-steps', JSON.stringify(next));
+      setCompletedCases(prev => {
+        const next = [...new Set([...prev, currentCase])];
+        localStorage.setItem('noir-completed-cases', JSON.stringify(next));
         return next;
       });
+      playSFX('win');
     } else {
-      // Conseguir pista
       const evItem = EVIDENCIAS_POSIBLES[Math.floor(Math.random() * EVIDENCIAS_POSIBLES.length)];
       const alreadyHas = evidence.some(e => e.name === evItem.name);
-
-      // Recompensa aleatoria de comida (30% probabilidad)
-      let foundFood = null;
-      if (Math.random() < 0.3) {
-        foundFood = Math.random() < 0.5 ? 'coffee' : 'food';
-        setInventory(prev => {
-          const next = { ...prev, [foundFood]: prev[foundFood] + 1 };
-          localStorage.setItem('noir-inventory', JSON.stringify(next));
-          return next;
-        });
+      let foodMsg = "";
+      if (Math.random() < 0.2) {
+        const fType = Math.random() < 0.5 ? 'coffee' : 'food';
+        setInventory(prev => ({ ...prev, [fType]: prev[fType] + 1 }));
+        foodMsg = ` y has encontrado ${fType === 'coffee' ? 'un ☕' : 'una 🥪'}`;
       }
 
       if (!alreadyHas) {
@@ -282,17 +305,13 @@ function App() {
         });
       }
       
-      const foodMsg = foundFood ? ` y has encontrado ${foundFood === 'coffee' ? 'un ☕' : 'una 🥪'}` : '';
+      setCaseSteps(prev => ({ ...prev, [currentCase]: currentStep + 1 }));
+      playSFX('match');
       setShowReward({ 
         pts, 
         diams: 5, 
-        msg: `¡Pista encontrada! ${evItem.name} nos acerca más a ${caseInfo.sospechoso.name}${foodMsg}.`, 
+        msg: `¡Pista encontrada! ${evItem.name}${foodMsg}.`, 
         evidence: alreadyHas ? null : evItem 
-      });
-      setCaseSteps(prev => {
-        const next = { ...prev, [currentCase]: currentStep + 1 };
-        localStorage.setItem('noir-case-steps', JSON.stringify(next));
-        return next;
       });
     }
   };
@@ -301,7 +320,9 @@ function App() {
   const renderHUD = () => (
     <HUD 
       score={score} energy={energy} diamonds={diamonds} infiniteEnergyTime={infiniteEnergyTime}
-      isMuted={isMuted} setIsMuted={setIsMuted} isTestMode={isTestMode} setIsTestMode={setIsTestMode}
+      isMuted={isMuted} setIsMuted={setIsMuted} 
+      musicEnabled={musicEnabled} setMusicEnabled={setMusicEnabled}
+      isTestMode={isTestMode} setIsTestMode={setIsTestMode}
       inventory={inventory} setEnergy={setEnergy} setInventory={setInventory}
       setShowLogin={setShowLogin} getXPInfo={getXPInfo} getRango={getRango}
     />
@@ -334,7 +355,13 @@ function App() {
     <div className="app-container" style={{paddingLeft: '420px', paddingTop: '70px'}}>
       <Detective thought={thought} />
       {renderHUD()}
-      <CityMap unlockedCases={unlockedCases} setCurrentCase={setCurrentCase} setView={setView} evidenceCount={evidence.length} />
+      <CityMap 
+        unlockedCases={unlockedCases} 
+        setCurrentCase={setCurrentCase} 
+        setView={setView} 
+        evidenceCount={evidence.length}
+        completedCases={completedCases}
+      />
       {renderEventOverlay()}
       {showLogin && <div className="reward-overlay"><div className="reward-content"><h3>LOGIN</h3><button className="btn btn-primary" onClick={()=>setShowLogin(false)}>Cerrar</button></div></div>}
     </div>
@@ -349,20 +376,29 @@ function App() {
       setView={setView} 
     />
   );
-  if (view === 'selector') return (
-    <CaseSelector 
-      caseIdx={currentCase} 
-      step={currentStep} 
-      unlockedCases={unlockedCases}
-      info={getCaseInfo(currentCase, currentStep)} 
-      isTestMode={isTestMode} 
-      isMuted={isMuted} 
-      speak={speak} 
-      startNewGame={startNewGame} 
-      setView={setView} 
-      renderDetective={()=><Detective thought={thought}/>} 
-    />
-  );
+  
+  const renderSelector = () => {
+    const info = getCaseInfo(currentCase, currentStep);
+    const isCompleted = completedCases.includes(currentCase);
+    return (
+      <CaseSelector 
+        caseIdx={currentCase} 
+        step={currentStep}
+        unlockedCases={unlockedCases}
+        info={info}
+        isTestMode={isTestMode}
+        isMuted={isMuted}
+        speak={speak}
+        startNewGame={startNewGame}
+        setView={setView}
+        renderDetective={()=><Detective thought={thought}/>}
+        isCompleted={isCompleted}
+        onReset={resetCase}
+      />
+    );
+  };
+
+  if (view === 'selector') return renderSelector();
 
   // View Game
   const info = getCaseInfo(currentCase, currentStep);
@@ -398,12 +434,12 @@ function App() {
 
       <h1 className="title" style={{textTransform:'uppercase', letterSpacing:'4px', marginTop:0}}>{gameType}</h1>
       <div className="game-card">
-        {gameType === 'sudoku' && <SudokuGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'match3' && <Match3Game level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'wordsearch' && <WordSearchGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'merge' && <MergeGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'puzzle' && <PuzzleGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'hidden' && <HiddenItemsGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
+        {gameType === 'sudoku' && <SudokuGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
+        {gameType === 'match3' && <Match3Game level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
+        {gameType === 'wordsearch' && <WordSearchGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
+        {gameType === 'merge' && <MergeGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
+        {gameType === 'puzzle' && <PuzzleGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
+        {gameType === 'hidden' && <HiddenItemsGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
       </div>
       {renderReward()}
     </div>

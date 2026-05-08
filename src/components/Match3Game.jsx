@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { initMatch3Grid, checkMatches, swap, MATCH3_ITEMS } from '../utils/match3Logic';
 
-export const Match3Game = ({ level, onWin, onExit }) => {
+export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
   const [grid, setGrid] = useState([]);
   const [cleanedTiles, setCleanedTiles] = useState(Array(36).fill(false));
   const [lizardProgress, setLizardProgress] = useState(0);
@@ -45,8 +45,10 @@ export const Match3Game = ({ level, onWin, onExit }) => {
     let newGrid = [...currentGrid];
     let newCleaned = [...cleanedTiles];
     
-    removedIndices.forEach(idx => { newCleaned[idx] = true; });
-    setCleanedTiles(newCleaned);
+    if (level >= 2) {
+      removedIndices.forEach(idx => { newCleaned[idx] = true; });
+      setCleanedTiles(newCleaned);
+    }
 
     for (let c = 0; c < 6; c++) {
       let emptySlot = 5;
@@ -80,6 +82,7 @@ export const Match3Game = ({ level, onWin, onExit }) => {
     const { matches, powerUps } = checkMatches(currentGrid);
     if (matches.length === 0) return { grid: currentGrid, score: currentScore };
 
+    if (playSFX) playSFX('match');
     let newGrid = [...currentGrid];
     let addedScore = matches.length * 10;
     let footprintCount = 0;
@@ -140,7 +143,7 @@ export const Match3Game = ({ level, onWin, onExit }) => {
     if (item.special) {
       triggerSpecial(idx, item.special, grid, score);
       setMoves(m => m - 1);
-      shiftConveyor();
+      if (level >= 7) shiftConveyor();
       return;
     }
 
@@ -161,9 +164,10 @@ export const Match3Game = ({ level, onWin, onExit }) => {
           setGrid(finalGrid);
           setScore(finalScore);
           setMoves(m => m - 1);
-          shiftConveyor();
+          if (level >= 7) shiftConveyor();
+          
           if (moves === 1) {
-            const allClean = cleanedTiles.every(v => v);
+            const allClean = level >= 2 ? cleanedTiles.every(v => v) : false;
             if (finalScore >= targetScore || allClean || lizardProgress >= 100) onWin();
             else { alert("Interrogatorio fallido."); onExit(); }
           }
@@ -206,8 +210,8 @@ export const Match3Game = ({ level, onWin, onExit }) => {
               className={`match3-slot ${selectedIdx === i ? 'selected' : ''}`}
               onClick={() => handleTileClick(i)}
               style={{
-                background: isConveyor ? 'rgba(100, 100, 100, 0.3)' : (isCleaned ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255,255,255,0.05)'),
-                border: isConveyor ? '2px dashed rgba(255,255,255,0.2)' : (isCleaned ? '1px solid gold' : '1px solid rgba(255,255,255,0.1)'),
+                background: (level >= 7 && isConveyor) ? 'rgba(100, 100, 100, 0.3)' : (level >= 2 && isCleaned ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255,255,255,0.05)'),
+                border: (level >= 7 && isConveyor) ? '2px dashed rgba(255,255,255,0.2)' : (level >= 2 && isCleaned ? '1px solid gold' : '1px solid rgba(255,255,255,0.1)'),
                 position: 'relative',
                 overflow: 'hidden'
               }}
