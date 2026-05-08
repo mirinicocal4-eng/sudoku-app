@@ -21,8 +21,8 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
 
   return (
     <div className="app-container" style={{
-      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
-      paddingLeft: '420px'
+      paddingLeft: '340px',
+      paddingTop: '70px'
     }}>
       {renderDetective()}
       <h1 className="title" style={{display:'flex', alignItems:'center', gap:'15px'}}>
@@ -35,7 +35,7 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
           
           {isCompleted ? (
             <div style={{margin:'20px 0', textAlign:'center', padding:'30px', background:'rgba(255,215,0,0.05)', borderRadius:'8px', border:'1px dashed gold'}}>
-              <p style={{color:'var(--noir-ink)', fontWeight:'bold'}}>Este caso ya ha sido cerrado con éxito.</p>
+              <p style={{color:'#ffffff', fontWeight:'bold'}}>Este caso ya ha sido cerrado con éxito.</p>
               <p style={{fontSize:'0.8rem', opacity:0.7, marginBottom:'20px'}}>Puedes reiniciarlo si quieres volver a investigar o mejorar tu puntuación.</p>
               <button className="btn btn-primary" onClick={() => onReset(caseIdx)} style={{background:'var(--noir-ink)', color:'gold'}}>🔄 REINICIAR EXPEDIENTE</button>
             </div>
@@ -47,14 +47,14 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
               <div style={{
                 margin: '20px 0',
                 padding: '20px',
-                background: 'rgba(0,0,0,0.03)',
+                background: 'rgba(255,255,255,0.05)',
                 borderLeft: '4px solid var(--noir-red)',
                 borderRadius: '4px',
                 fontStyle: 'italic',
                 position: 'relative'
               }}>
                 <span style={{position:'absolute', top:'-10px', left:'10px', background:'var(--noir-red)', color:'white', fontSize:'0.6rem', padding:'2px 8px', borderRadius:'4px', fontStyle:'normal', fontWeight:'bold'}}>INFORME DE MISIÓN</span>
-                <p style={{margin:0, fontSize:'0.95rem', lineHeight:'1.5', color:'var(--noir-ink)'}}>"{info.desc}"</p>
+                <p style={{margin:0, fontSize:'0.95rem', lineHeight:'1.5', color:'#ffffff'}}>"{info.desc}"</p>
               </div>
               <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
                 {available.map(t => {
@@ -81,7 +81,7 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
             </div>
             <img src={info.sospechoso.img} style={{width:'100%', borderRadius:'4px'}} alt="suspect" />
           </div>
-          <p style={{fontSize:'0.7rem', fontWeight:'bold', marginTop:'8px', color:'var(--noir-ink)', textTransform:'uppercase'}}>{info.sospechoso.name}</p>
+          <p style={{fontSize:'0.7rem', fontWeight:'bold', marginTop:'8px', color:'#ffffff', textTransform:'uppercase'}}>{info.sospechoso.name}</p>
           <div style={{marginTop:'15px', borderTop:'1px solid #ccc', paddingTop:'10px'}}>
             <p style={{fontSize:'0.6rem', opacity:0.7}}>ASIGNADO POR:</p>
             <img src={p.img} style={{width:'40px', borderRadius:'50%', border:'1px solid #999', marginTop:'5px'}} alt="agent" />

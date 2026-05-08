@@ -6,16 +6,19 @@ export const CityMap = ({ unlockedCases, setCurrentCase, setView, evidenceCount,
     <>
       <h1 className="title" style={{marginTop:'20px'}}>EXPEDIENTES NOIR</h1>
       <div className="city-map-container" style={{
-        backgroundImage: 'url(/mapa_noir_pro.png)', 
-        height: '650px', 
+        backgroundImage: 'url(/mapa_moderno.png)', 
+        width: '100%',
+        aspectRatio: '16 / 9',
         position:'relative',
         borderRadius: '24px',
-        backgroundSize: 'cover',
+        backgroundSize: '100% 100%',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
         boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
         border: '1px solid rgba(255,215,0,0.1)'
       }}>
         {PUNTOS_MAPA.slice(0, unlockedCases).map((p, i) => {
-          const isDone = completedCases.includes(i + 1);
+          const isDone = Array.isArray(completedCases) && completedCases.includes(i + 1);
           return (
             <div 
               key={i} 

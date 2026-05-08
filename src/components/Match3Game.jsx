@@ -83,10 +83,6 @@ export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
     if (matches.length === 0) return { grid: currentGrid, score: currentScore };
 
     if (playSFX) playSFX('match');
-<<<<<<< HEAD
-
-=======
->>>>>>> a3a73a452813414358b36441870c3aae6d49eb1a
     let newGrid = [...currentGrid];
     let addedScore = matches.length * 10;
     let footprintCount = 0;

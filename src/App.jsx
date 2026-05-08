@@ -69,33 +69,9 @@ function App() {
   // --- STATE ---
   const [view, setView] = useState('menu');
   const [isMuted, setIsMuted] = useState(false);
-  const [musicEnabled, setMusicEnabled] = useState(true);
   const [isTestMode, setIsTestMode] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
 
-  const bgMusic = useRef(new Audio('https://www.fesliyanstudios.com/play-mp3/2405')); // Noir Jazz loop
-
-  useEffect(() => {
-    bgMusic.current.loop = true;
-    bgMusic.current.volume = 0.3;
-    if (musicEnabled) {
-      bgMusic.current.play().catch(e => console.log("Auto-play blocked"));
-    } else {
-      bgMusic.current.pause();
-    }
-  }, [musicEnabled]);
-
-  const playSFX = (type) => {
-    if (isMuted) return;
-    const sfxMap = {
-      click: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
-      win: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3',
-      match: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'
-    };
-    const audio = new Audio(sfxMap[type]);
-    audio.volume = 0.5;
-    audio.play().catch(() => { });
-  };
   // Progression
   const [unlockedCases, setUnlockedCases] = useState(1);
   const [currentCase, setCurrentCase] = useState(1);
@@ -143,6 +119,12 @@ function App() {
     if (savedEv) setEvidence(JSON.parse(savedEv));
   }, []);
 
+  const resetCase = (caseIdx) => {
+    setCaseSteps(prev => ({ ...prev, [caseIdx]: 1 }));
+    localStorage.setItem('noir-case-steps', JSON.stringify({ ...caseSteps, [caseIdx]: 1 }));
+    setThought("Borrón y cuenta nueva. Empezamos de cero.");
+  };
+
   useEffect(() => {
     if (view === 'game') return;
 
@@ -152,7 +134,10 @@ function App() {
 
     const t = possibleThoughts[Math.floor(Math.random() * possibleThoughts.length)];
     setThought(t);
-    if (view === 'menu' || view === 'warehouse') speak(t, isMuted, 'male');
+    // Solo hablamos si el usuario está en el menú y no es un re-render por mute
+    if (view === 'menu' || view === 'warehouse') {
+      speak(t, isMuted, 'male');
+    }
   }, [view, isMuted]);
 
   const [activeEvent, setActiveEvent] = useState(null);
@@ -305,7 +290,6 @@ function App() {
       }
 
       setCaseSteps(prev => ({ ...prev, [currentCase]: currentStep + 1 }));
-      playSFX('match');
       setShowReward({
         pts,
         diams: 5,
@@ -320,7 +304,6 @@ function App() {
     <HUD
       score={score} energy={energy} diamonds={diamonds} infiniteEnergyTime={infiniteEnergyTime}
       isMuted={isMuted} setIsMuted={setIsMuted}
-      musicEnabled={musicEnabled} setMusicEnabled={setMusicEnabled}
       isTestMode={isTestMode} setIsTestMode={setIsTestMode}
       inventory={inventory} setEnergy={setEnergy} setInventory={setInventory}
       setShowLogin={setShowLogin} getXPInfo={getXPInfo} getRango={getRango}
@@ -352,10 +335,11 @@ function App() {
 
   if (view === 'menu') return (
     <div className="app-container" style={{
-      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
-      paddingLeft: '420px',
+      paddingLeft: '340px',
       paddingTop: '70px'
     }}>
+      <Detective thought={thought} />
+      {renderHUD()}
       <CityMap
         unlockedCases={unlockedCases}
         setCurrentCase={setCurrentCase}
@@ -405,8 +389,7 @@ function App() {
   const info = getCaseInfo(currentCase, currentStep);
   return (
     <div className="app-container" style={{
-      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
-      paddingLeft: '420px',
+      paddingLeft: '340px',
       paddingTop: '70px'
     }}>
       <Detective thought={thought} />
@@ -440,11 +423,11 @@ function App() {
       <h1 className="title" style={{ textTransform: 'uppercase', letterSpacing: '4px', marginTop: 0 }}>{gameType}</h1>
       <div className="game-card">
         {gameType === 'sudoku' && <SudokuGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'match3' && <Match3Game level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
+        {gameType === 'match3' && <Match3Game level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
         {gameType === 'wordsearch' && <WordSearchGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
         {gameType === 'merge' && <MergeGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
         {gameType === 'puzzle' && <PuzzleGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
-        {gameType === 'hidden' && <HiddenItemsGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}
+        {gameType === 'hidden' && <HiddenItemsGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
       </div>
       {renderReward()}
     </div>
