@@ -56,12 +56,12 @@ const speak = (text, isMuted, gender = 'male') => {
   const utterance = new SpeechSynthesisUtterance(text);
   const voices = window.speechSynthesis.getVoices();
   const esVoices = voices.filter(v => v.lang.startsWith('es'));
-  let selectedVoice = gender === 'female' 
+  let selectedVoice = gender === 'female'
     ? esVoices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('laura'))
     : esVoices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('pablo'));
   utterance.pitch = gender === 'female' ? 1.1 : 0.8;
   if (selectedVoice) utterance.voice = selectedVoice;
-  utterance.rate = 0.95; 
+  utterance.rate = 0.95;
   window.speechSynthesis.speak(utterance);
 };
 
@@ -72,7 +72,7 @@ function App() {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [isTestMode, setIsTestMode] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
-  
+
   const bgMusic = useRef(new Audio('https://www.fesliyanstudios.com/play-mp3/2405')); // Noir Jazz loop
 
   useEffect(() => {
@@ -94,15 +94,16 @@ function App() {
     };
     const audio = new Audio(sfxMap[type]);
     audio.volume = 0.5;
-    audio.play().catch(() => {});
+    audio.play().catch(() => { });
   };
   // Progression
   const [unlockedCases, setUnlockedCases] = useState(1);
   const [currentCase, setCurrentCase] = useState(1);
   const [caseSteps, setCaseSteps] = useState({ 1: 1 }); // { caseIdx: step }
-  
+
   const currentStep = caseSteps[currentCase] || 1;
-  
+
+  const [completedCases, setCompletedCases] = useState([]);
   const [gameType, setGameType] = useState('sudoku');
   const [thought, setThought] = useState("");
   const [score, setScore] = useState(0);
@@ -113,7 +114,7 @@ function App() {
   const [evidence, setEvidence] = useState([]);
   const [showReward, setShowReward] = useState(null);
   const [activeDialogue, setActiveDialogue] = useState("");
-  
+
   // Temporizador de Energía Infinita (Turbo)
   useEffect(() => {
     if (infiniteEnergyTime > 0) {
@@ -132,11 +133,13 @@ function App() {
     const savedDiams = localStorage.getItem('noir-diamonds');
     const savedInv = localStorage.getItem('noir-inventory');
     const savedEv = localStorage.getItem('noir-evidence');
+    const savedCompleted = localStorage.getItem('noir-completed-cases');
     if (savedCases) setUnlockedCases(parseInt(savedCases));
     if (savedSteps) setCaseSteps(JSON.parse(savedSteps));
     if (savedScore) setScore(parseInt(savedScore));
     if (savedDiams) setDiamonds(parseInt(savedDiams));
     if (savedInv) setInventory(JSON.parse(savedInv));
+    if (savedCompleted) setCompletedCases(JSON.parse(savedCompleted));
     if (savedEv) setEvidence(JSON.parse(savedEv));
   }, []);
 
@@ -146,25 +149,25 @@ function App() {
     let possibleThoughts = ["La lluvia no limpia el pecado de esta ciudad.", "Necesito una pista.", "El café está frío."];
     if (view === 'warehouse') possibleThoughts = ["El archivo nunca miente.", "Tantas pruebas, tan poco tiempo."];
     else if (view === 'selector') possibleThoughts = ["Miller me vigila de cerca.", "Este informe parece incompleto."];
-    
+
     const t = possibleThoughts[Math.floor(Math.random() * possibleThoughts.length)];
     setThought(t);
     if (view === 'menu' || view === 'warehouse') speak(t, isMuted, 'male');
   }, [view, isMuted]);
 
   const [activeEvent, setActiveEvent] = useState(null);
-  
+
   const triggerRandomEvent = () => {
     // 20% de probabilidad de evento al volver al menú
     if (Math.random() > 0.2) return;
-    
+
     const personajesEvento = [
       { name: "Miller", img: "/detective_normal.png", msg: "¡Detective! Ha surgido una emergencia en comisaría. ¿Puedes ayudarme con este informe?", type: "sudoku", reward: { diams: 10 } },
       { name: "Oficial Martínez", img: "/oficial_martinez.png", msg: "¡Señor! He interceptado una comunicación sospechosa. ¿Podría echarle un vistazo?", type: "wordsearch", reward: { food: 1 } },
       { name: "Tony 'El Flaco'", img: "/tony_el_flaco.png", msg: "¿Te crees muy listo, detective? Resuelve esto si quieres que te cuente lo que sé.", type: "puzzle", reward: { diams: 15 } },
       { name: "Sujeto Desconocido", img: "/sospechoso_misterio.png", msg: "Te estoy vigilando. Veamos qué tan rápido eres encontrando esto...", type: "hidden", reward: { coffee: 1 } }
     ];
-    
+
     const ev = personajesEvento[Math.floor(Math.random() * personajesEvento.length)];
     setActiveEvent(ev);
   };
@@ -186,7 +189,7 @@ function App() {
     const titulo = `${TITULOS[(caseIdx * 7) % TITULOS.length]} ${OBJETOS[(caseIdx * 3) % OBJETOS.length]}`;
     const realSospechoso = SOSPECHOSOS[(caseIdx * 5) % SOSPECHOSOS.length];
     const narrativa = NARRATIVAS[step - 1] || "Investigación en curso...";
-    
+
     const sospechoso = step === 7 ? realSospechoso : {
       name: "Sujeto Desconocido",
       img: "/sospechoso_misterio.png",
@@ -194,11 +197,11 @@ function App() {
       gender: "male"
     };
 
-    return { 
-      caseIdx, step, barrio, 
-      titulo: `CASO #${caseIdx}: ${barrio}`, 
-      mision: step === 7 ? `⚖️ INTERROGATORIO FINAL: ${realSospechoso.name}` : `PASO ${step}/7: ${titulo}`, 
-      desc: narrativa, 
+    return {
+      caseIdx, step, barrio,
+      titulo: `CASO #${caseIdx}: ${barrio}`,
+      mision: step === 7 ? `⚖️ INTERROGATORIO FINAL: ${realSospechoso.name}` : `PASO ${step}/7: ${titulo}`,
+      desc: narrativa,
       sospechoso
     };
   };
@@ -207,13 +210,13 @@ function App() {
     if (!activeEvent) return null;
     return (
       <div className="reward-overlay">
-        <div className="reward-content event-card" style={{border: '4px solid var(--noir-red)'}}>
-          <div style={{display:'flex', gap:'20px', alignItems:'center'}}>
-            <img src={activeEvent.img} alt={activeEvent.name} style={{width:'100px', height:'100px', borderRadius:'10px', border:'2px solid var(--noir-ink)'}} />
-            <div style={{textAlign:'left'}}>
-              <h3 style={{color:'var(--noir-red)', margin:0}}>{activeEvent.name}</h3>
-              <p style={{fontSize:'0.9rem', margin:'10px 0', fontFamily:'Inter'}}>{activeEvent.msg}</p>
-              <div style={{display:'flex', gap:'10px'}}>
+        <div className="reward-content event-card" style={{ border: '4px solid var(--noir-red)' }}>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <img src={activeEvent.img} alt={activeEvent.name} style={{ width: '100px', height: '100px', borderRadius: '10px', border: '2px solid var(--noir-ink)' }} />
+            <div style={{ textAlign: 'left' }}>
+              <h3 style={{ color: 'var(--noir-red)', margin: 0 }}>{activeEvent.name}</h3>
+              <p style={{ fontSize: '0.9rem', margin: '10px 0', fontFamily: 'Inter' }}>{activeEvent.msg}</p>
+              <div style={{ display: 'flex', gap: '10px' }}>
                 <button className="btn btn-primary" onClick={startEvent}>ACEPTAR DESAFÍO</button>
                 <button className="btn" onClick={() => setActiveEvent(null)}>IGNORAR</button>
               </div>
@@ -227,11 +230,11 @@ function App() {
   const startNewGame = (caseIdx, type, dialogue = "") => {
     const isFree = isTestMode || infiniteEnergyTime > 0;
     if (!isFree && energy < 20) { alert("Agotado."); return; }
-    if (!isFree) setEnergy(e => { localStorage.setItem('noir-energy', e-20); return e-20; });
-    
-    setThought(""); 
+    if (!isFree) setEnergy(e => { localStorage.setItem('noir-energy', e - 20); return e - 20; });
+
+    setThought("");
     setActiveDialogue(dialogue);
-    setGameType(type); 
+    setGameType(type);
     setShowReward(null);
     setView('game');
   };
@@ -239,13 +242,13 @@ function App() {
   const finishGame = () => {
     const pts = 100 + (currentCase * 10);
     setScore(s => { localStorage.setItem('noir-score', s + pts); return s + pts; });
-    
+
     // Si era un evento aleatorio
     if (activeEvent) {
       const reward = activeEvent.reward;
       if (reward.diams) setDiamonds(d => d + reward.diams);
-      if (reward.coffee) setInventory(i => ({...i, coffee: i.coffee + reward.coffee}));
-      
+      if (reward.coffee) setInventory(i => ({ ...i, coffee: i.coffee + reward.coffee }));
+
       setShowReward({
         pts: pts * 1.5,
         diams: reward.diams || 0,
@@ -255,9 +258,9 @@ function App() {
       setActiveEvent(null);
       return;
     }
-    
+
     const caseInfo = getCaseInfo(currentCase, currentStep);
-    
+
     if (currentStep === 7) {
       // Caso cerrado
       const extraCoffee = 1;
@@ -268,34 +271,29 @@ function App() {
         return next;
       });
 
-      setShowReward({ 
-        pts: pts * 2, 
-        diams: 20, 
-        msg: `¡CASO CERRADO! Hemos arrestado a ${caseInfo.sospechoso.name}. Recompensa extra: ☕x${extraCoffee} 🥪x${extraFood}`, 
-        evidence: null 
+      setShowReward({
+        pts: pts * 2,
+        diams: 20,
+        msg: `¡CASO CERRADO! Hemos arrestado a ${caseInfo.sospechoso.name}. Recompensa extra: ☕x${extraCoffee} 🥪x${extraFood}`,
+        evidence: null
       });
       if (currentCase === unlockedCases) {
         setUnlockedCases(prev => { localStorage.setItem('noir-cases', prev + 1); return prev + 1; });
       }
-      setCaseSteps(prev => {
-        const next = { ...prev, [currentCase]: 1 };
-        localStorage.setItem('noir-case-steps', JSON.stringify(next));
+      setCompletedCases(prev => {
+        const next = [...new Set([...prev, currentCase])];
+        localStorage.setItem('noir-completed-cases', JSON.stringify(next));
         return next;
       });
+      playSFX('win');
     } else {
-      // Conseguir pista
       const evItem = EVIDENCIAS_POSIBLES[Math.floor(Math.random() * EVIDENCIAS_POSIBLES.length)];
       const alreadyHas = evidence.some(e => e.name === evItem.name);
-
-      // Recompensa aleatoria de comida (30% probabilidad)
-      let foundFood = null;
-      if (Math.random() < 0.3) {
-        foundFood = Math.random() < 0.5 ? 'coffee' : 'food';
-        setInventory(prev => {
-          const next = { ...prev, [foundFood]: prev[foundFood] + 1 };
-          localStorage.setItem('noir-inventory', JSON.stringify(next));
-          return next;
-        });
+      let foodMsg = "";
+      if (Math.random() < 0.2) {
+        const fType = Math.random() < 0.5 ? 'coffee' : 'food';
+        setInventory(prev => ({ ...prev, [fType]: prev[fType] + 1 }));
+        foodMsg = ` y has encontrado ${fType === 'coffee' ? 'un ☕' : 'una 🥪'}`;
       }
 
       if (!alreadyHas) {
@@ -305,27 +303,23 @@ function App() {
           return next;
         });
       }
-      
-      const foodMsg = foundFood ? ` y has encontrado ${foundFood === 'coffee' ? 'un ☕' : 'una 🥪'}` : '';
-      setShowReward({ 
-        pts, 
-        diams: 5, 
-        msg: `¡Pista encontrada! ${evItem.name} nos acerca más a ${caseInfo.sospechoso.name}${foodMsg}.`, 
-        evidence: alreadyHas ? null : evItem 
-      });
-      setCaseSteps(prev => {
-        const next = { ...prev, [currentCase]: currentStep + 1 };
-        localStorage.setItem('noir-case-steps', JSON.stringify(next));
-        return next;
+
+      setCaseSteps(prev => ({ ...prev, [currentCase]: currentStep + 1 }));
+      playSFX('match');
+      setShowReward({
+        pts,
+        diams: 5,
+        msg: `¡Pista encontrada! ${evItem.name}${foodMsg}.`,
+        evidence: alreadyHas ? null : evItem
       });
     }
   };
 
   // --- RENDER ---
   const renderHUD = () => (
-    <HUD 
+    <HUD
       score={score} energy={energy} diamonds={diamonds} infiniteEnergyTime={infiniteEnergyTime}
-      isMuted={isMuted} setIsMuted={setIsMuted} 
+      isMuted={isMuted} setIsMuted={setIsMuted}
       musicEnabled={musicEnabled} setMusicEnabled={setMusicEnabled}
       isTestMode={isTestMode} setIsTestMode={setIsTestMode}
       inventory={inventory} setEnergy={setEnergy} setInventory={setInventory}
@@ -336,66 +330,87 @@ function App() {
   const renderReward = () => showReward && (
     <div className="reward-overlay">
       <div className="reward-content celebration">
-        <h2 style={{color:'gold'}}>¡CASO CERRADO!</h2>
+        <h2 style={{ color: 'gold' }}>¡CASO CERRADO!</h2>
         <p>"{showReward.msg}"</p>
         <div className="reward-grid">
           <div className="reward-badge">+{showReward.pts} pts</div>
           <div className="reward-badge">+{showReward.diams} 💎</div>
         </div>
         {showReward.evidence && (
-          <div style={{marginTop:'15px', padding:'10px', background:'rgba(255,255,255,0.05)', borderRadius:'8px', border:'1px dashed gold'}}>
-            <p style={{fontSize:'0.6rem', color:'gold'}}>EVIDENCIA ENCONTRADA</p>
-            <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'10px'}}>
-              <span style={{fontSize:'2rem'}}>{showReward.evidence.icon}</span>
-              <span style={{fontWeight:'bold'}}>{showReward.evidence.name}</span>
+          <div style={{ marginTop: '15px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px dashed gold' }}>
+            <p style={{ fontSize: '0.6rem', color: 'gold' }}>EVIDENCIA ENCONTRADA</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '2rem' }}>{showReward.evidence.icon}</span>
+              <span style={{ fontWeight: 'bold' }}>{showReward.evidence.name}</span>
             </div>
           </div>
         )}
-        <button className="btn btn-primary" style={{marginTop:'20px'}} onClick={() => { speak(showReward.msg, isMuted); setShowReward(null); setView('menu'); }}>Continuar</button>
+        <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => { speak(showReward.msg, isMuted); setShowReward(null); setView('menu'); }}>Continuar</button>
       </div>
     </div>
   );
 
   if (view === 'menu') return (
-    <div className="app-container" style={{paddingLeft: '420px', paddingTop: '70px'}}>
-      <Detective thought={thought} />
-      {renderHUD()}
-      <CityMap unlockedCases={unlockedCases} setCurrentCase={setCurrentCase} setView={setView} evidenceCount={evidence.length} />
+    <div className="app-container" style={{
+      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
+      paddingLeft: '420px',
+      paddingTop: '70px'
+    }}>
+      <CityMap
+        unlockedCases={unlockedCases}
+        setCurrentCase={setCurrentCase}
+        setView={setView}
+        evidenceCount={evidence.length}
+        completedCases={completedCases}
+      />
       {renderEventOverlay()}
-      {showLogin && <div className="reward-overlay"><div className="reward-content"><h3>LOGIN</h3><button className="btn btn-primary" onClick={()=>setShowLogin(false)}>Cerrar</button></div></div>}
+      {showLogin && <div className="reward-overlay"><div className="reward-content"><h3>LOGIN</h3><button className="btn btn-primary" onClick={() => setShowLogin(false)}>Cerrar</button></div></div>}
     </div>
   );
 
   if (view === 'warehouse') return (
-    <Warehouse 
-      evidence={evidence} 
-      inventory={inventory} 
-      setInventory={setInventory} 
-      setEnergy={setEnergy} 
-      setView={setView} 
+    <Warehouse
+      evidence={evidence}
+      inventory={inventory}
+      setInventory={setInventory}
+      setEnergy={setEnergy}
+      setView={setView}
     />
   );
-  if (view === 'selector') return (
-    <CaseSelector 
-      caseIdx={currentCase} 
-      step={currentStep} 
-      unlockedCases={unlockedCases}
-      info={getCaseInfo(currentCase, currentStep)} 
-      isTestMode={isTestMode} 
-      isMuted={isMuted} 
-      speak={speak} 
-      startNewGame={startNewGame} 
-      setView={setView} 
-      renderDetective={()=><Detective thought={thought}/>} 
-    />
-  );
+
+  const renderSelector = () => {
+    const info = getCaseInfo(currentCase, currentStep);
+    const isCompleted = completedCases.includes(currentCase);
+    return (
+      <CaseSelector
+        caseIdx={currentCase}
+        step={currentStep}
+        unlockedCases={unlockedCases}
+        info={info}
+        isTestMode={isTestMode}
+        isMuted={isMuted}
+        speak={speak}
+        startNewGame={startNewGame}
+        setView={setView}
+        renderDetective={() => <Detective thought={thought} />}
+        isCompleted={isCompleted}
+        onReset={resetCase}
+      />
+    );
+  };
+
+  if (view === 'selector') return renderSelector();
 
   // View Game
   const info = getCaseInfo(currentCase, currentStep);
   return (
-    <div className="app-container" style={{paddingLeft: '420px', paddingTop:'70px'}}>
+    <div className="app-container" style={{
+      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
+      paddingLeft: '420px',
+      paddingTop: '70px'
+    }}>
       <Detective thought={thought} />
-      
+
       {/* Narrativa y Diálogo del Personaje durante el juego */}
       <div style={{
         background: 'var(--noir-ink)',
@@ -406,23 +421,23 @@ function App() {
         borderLeft: '4px solid var(--noir-red)',
         boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
       }}>
-        <div style={{fontSize: '0.85rem', fontStyle: 'italic', marginBottom:'5px'}}>
-          <span style={{color:'var(--noir-red)', fontWeight:'bold', marginRight:'10px'}}>INFORME:</span> 
+        <div style={{ fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '5px' }}>
+          <span style={{ color: 'var(--noir-red)', fontWeight: 'bold', marginRight: '10px' }}>INFORME:</span>
           "{info.desc}"
         </div>
         {activeDialogue && (
-          <div style={{fontSize: '0.75rem', opacity: 0.9, borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'5px', marginBottom:'5px'}}>
-            <span style={{color:'gold', fontWeight:'bold', marginRight:'10px'}}>INSTRUCCIÓN:</span> 
+          <div style={{ fontSize: '0.75rem', opacity: 0.9, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '5px', marginBottom: '5px' }}>
+            <span style={{ color: 'gold', fontWeight: 'bold', marginRight: '10px' }}>INSTRUCCIÓN:</span>
             {activeDialogue}
           </div>
         )}
-        <div style={{fontSize: '0.7rem', opacity: 0.7, borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'5px'}}>
-          <span style={{color:'#00d1ff', fontWeight:'bold', marginRight:'10px'}}>REGLAS:</span> 
+        <div style={{ fontSize: '0.7rem', opacity: 0.7, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '5px' }}>
+          <span style={{ color: '#00d1ff', fontWeight: 'bold', marginRight: '10px' }}>REGLAS:</span>
           {REGLAS_JUEGOS[gameType]}
         </div>
       </div>
 
-      <h1 className="title" style={{textTransform:'uppercase', letterSpacing:'4px', marginTop:0}}>{gameType}</h1>
+      <h1 className="title" style={{ textTransform: 'uppercase', letterSpacing: '4px', marginTop: 0 }}>{gameType}</h1>
       <div className="game-card">
         {gameType === 'sudoku' && <SudokuGame level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} />}
         {gameType === 'match3' && <Match3Game level={currentCase} step={currentStep} onWin={finishGame} onExit={() => setView('menu')} playSFX={playSFX} />}

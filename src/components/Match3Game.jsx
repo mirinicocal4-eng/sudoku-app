@@ -45,8 +45,10 @@ export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
     let newGrid = [...currentGrid];
     let newCleaned = [...cleanedTiles];
     
-    removedIndices.forEach(idx => { newCleaned[idx] = true; });
-    setCleanedTiles(newCleaned);
+    if (level >= 2) {
+      removedIndices.forEach(idx => { newCleaned[idx] = true; });
+      setCleanedTiles(newCleaned);
+    }
 
     for (let c = 0; c < 6; c++) {
       let emptySlot = 5;
@@ -81,7 +83,10 @@ export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
     if (matches.length === 0) return { grid: currentGrid, score: currentScore };
 
     if (playSFX) playSFX('match');
+<<<<<<< HEAD
 
+=======
+>>>>>>> a3a73a452813414358b36441870c3aae6d49eb1a
     let newGrid = [...currentGrid];
     let addedScore = matches.length * 10;
     let footprintCount = 0;
@@ -142,7 +147,7 @@ export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
     if (item.special) {
       triggerSpecial(idx, item.special, grid, score);
       setMoves(m => m - 1);
-      shiftConveyor();
+      if (level >= 7) shiftConveyor();
       return;
     }
 
@@ -163,9 +168,10 @@ export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
           setGrid(finalGrid);
           setScore(finalScore);
           setMoves(m => m - 1);
-          shiftConveyor();
+          if (level >= 7) shiftConveyor();
+          
           if (moves === 1) {
-            const allClean = cleanedTiles.every(v => v);
+            const allClean = level >= 2 ? cleanedTiles.every(v => v) : false;
             if (finalScore >= targetScore || allClean || lizardProgress >= 100) onWin();
             else { alert("Interrogatorio fallido."); onExit(); }
           }
@@ -208,8 +214,8 @@ export const Match3Game = ({ level, onWin, onExit, playSFX }) => {
               className={`match3-slot ${selectedIdx === i ? 'selected' : ''}`}
               onClick={() => handleTileClick(i)}
               style={{
-                background: isConveyor ? 'rgba(100, 100, 100, 0.3)' : (isCleaned ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255,255,255,0.05)'),
-                border: isConveyor ? '2px dashed rgba(255,255,255,0.2)' : (isCleaned ? '1px solid gold' : '1px solid rgba(255,255,255,0.1)'),
+                background: (level >= 7 && isConveyor) ? 'rgba(100, 100, 100, 0.3)' : (level >= 2 && isCleaned ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255,255,255,0.05)'),
+                border: (level >= 7 && isConveyor) ? '2px dashed rgba(255,255,255,0.2)' : (level >= 2 && isCleaned ? '1px solid gold' : '1px solid rgba(255,255,255,0.1)'),
                 position: 'relative',
                 overflow: 'hidden'
               }}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { PERSONAJES, GAME_ASIG } from '../utils/constants';
 
-export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, isMuted, speak, startNewGame, setView, renderDetective }) => {
+export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, isMuted, speak, startNewGame, setView, renderDetective, isCompleted, onReset }) => {
   const allTypes = ['hidden', 'sudoku', 'wordsearch', 'merge', 'match3', 'puzzle'];
   const isBossLevel = step === 7;
   const count = isTestMode ? 6 : Math.min(3, unlockedCases);
@@ -20,42 +20,59 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
   const p = PERSONAJES[pKey];
 
   return (
-    <div className="app-container" style={{paddingLeft: '420px'}}>
+    <div className="app-container" style={{
+      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro.png)',
+      paddingLeft: '420px'
+    }}>
       {renderDetective()}
-      <h1 className="title">{info.titulo}</h1>
+      <h1 className="title" style={{display:'flex', alignItems:'center', gap:'15px'}}>
+        {info.titulo}
+        {isCompleted && <span style={{background:'gold', color:'black', fontSize:'0.7rem', padding:'4px 10px', borderRadius:'20px', fontWeight:'bold', boxShadow:'0 0 10px rgba(255,215,0,0.5)'}}>✓ RESUELTO</span>}
+      </h1>
       <div className="game-card" style={{display:'flex', gap:'20px', alignItems:'flex-start'}}>
         <div style={{flex:1}}>
           <h2 style={{color:'var(--noir-red)', fontSize:'1rem'}}>{info.mision}</h2>
-          <div style={{margin:'10px 0', padding:'5px', background:'var(--noir-ink)', color:'gold', fontSize:'0.7rem', textAlign:'center', borderRadius:'4px'}}>
-            👤 SOSPECHOSO: <span style={{fontWeight:'bold', textTransform:'uppercase'}}>{info.sospechoso.name}</span>
-          </div>
-          <div style={{
-            margin: '20px 0',
-            padding: '20px',
-            background: 'rgba(0,0,0,0.03)',
-            borderLeft: '4px solid var(--noir-red)',
-            borderRadius: '4px',
-            fontStyle: 'italic',
-            position: 'relative'
-          }}>
-            <span style={{position:'absolute', top:'-10px', left:'10px', background:'var(--noir-red)', color:'white', fontSize:'0.6rem', padding:'2px 8px', borderRadius:'4px', fontStyle:'normal', fontWeight:'bold'}}>INFORME DE MISIÓN</span>
-            <p style={{margin:0, fontSize:'0.95rem', lineHeight:'1.5', color:'var(--noir-ink)'}}>"{info.desc}"</p>
-          </div>
-          <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-            {available.map(t => {
-              const char = PERSONAJES[GAME_ASIG[t]];
-              return (
-                <button key={t} className="btn" onClick={() => {
-                  speak(char.text, isMuted, char.gender);
-                  startNewGame(caseIdx, t, char.text);
-                }} style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                  <span>{labels[t]}</span>
-                  <span style={{fontSize:'0.7rem', opacity:0.7}}>{char.name}</span>
-                </button>
-              );
-            })}
-            <button className="btn btn-primary" onClick={() => setView('menu')}>Volver al Mapa</button>
-          </div>
+          
+          {isCompleted ? (
+            <div style={{margin:'20px 0', textAlign:'center', padding:'30px', background:'rgba(255,215,0,0.05)', borderRadius:'8px', border:'1px dashed gold'}}>
+              <p style={{color:'var(--noir-ink)', fontWeight:'bold'}}>Este caso ya ha sido cerrado con éxito.</p>
+              <p style={{fontSize:'0.8rem', opacity:0.7, marginBottom:'20px'}}>Puedes reiniciarlo si quieres volver a investigar o mejorar tu puntuación.</p>
+              <button className="btn btn-primary" onClick={() => onReset(caseIdx)} style={{background:'var(--noir-ink)', color:'gold'}}>🔄 REINICIAR EXPEDIENTE</button>
+            </div>
+          ) : (
+            <>
+              <div style={{margin:'10px 0', padding:'5px', background:'var(--noir-ink)', color:'gold', fontSize:'0.7rem', textAlign:'center', borderRadius:'4px'}}>
+                👤 SOSPECHOSO: <span style={{fontWeight:'bold', textTransform:'uppercase'}}>{info.sospechoso.name}</span>
+              </div>
+              <div style={{
+                margin: '20px 0',
+                padding: '20px',
+                background: 'rgba(0,0,0,0.03)',
+                borderLeft: '4px solid var(--noir-red)',
+                borderRadius: '4px',
+                fontStyle: 'italic',
+                position: 'relative'
+              }}>
+                <span style={{position:'absolute', top:'-10px', left:'10px', background:'var(--noir-red)', color:'white', fontSize:'0.6rem', padding:'2px 8px', borderRadius:'4px', fontStyle:'normal', fontWeight:'bold'}}>INFORME DE MISIÓN</span>
+                <p style={{margin:0, fontSize:'0.95rem', lineHeight:'1.5', color:'var(--noir-ink)'}}>"{info.desc}"</p>
+              </div>
+              <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+                {available.map(t => {
+                  const char = PERSONAJES[GAME_ASIG[t]];
+                  return (
+                    <button key={t} className="btn" onClick={() => {
+                      speak(char.text, isMuted, char.gender);
+                      startNewGame(caseIdx, t, char.text);
+                    }} style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                      <span>{labels[t]}</span>
+                      <span style={{fontSize:'0.7rem', opacity:0.7}}>{char.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+          <button className="btn btn-primary" style={{marginTop:'10px'}} onClick={() => setView('menu')}>Volver al Mapa</button>
         </div>
         <div style={{width:'180px', textAlign:'center'}}>
           <div style={{position:'relative', border:'3px solid var(--noir-red)', borderRadius:'8px', padding:'5px', background:'white'}}>

@@ -19,17 +19,31 @@ const OBSTACLE_IDS = [10, 11, 12];
 
 export const initMatch3Grid = (level = 1) => {
   return Array(36).fill(null).map((_, i) => {
-    // Spawneo de Diamante Perdido (solo en fila superior y con baja probabilidad)
-    if (i < 6 && Math.random() < 0.05) {
+    // 💎 Diamantes Perdidos (Coleccionables) - Desbloquea en Caso 6
+    if (level >= 6 && i < 6 && Math.random() < 0.05) {
       return { ...MATCH3_ITEMS[12], uid: Math.random() };
     }
-    const isObstacle = Math.random() < (0.1 + (level * 0.02));
+
+    // Probabilidad de obstáculos basada en nivel
+    const prob = level === 1 ? 0 : 0.1 + (level * 0.02);
+    const isObstacle = Math.random() < prob;
+
     if (isObstacle) {
-      const obsType = OBSTACLE_IDS[Math.floor(Math.random() * OBSTACLE_IDS.length)];
-      return { ...MATCH3_ITEMS[obsType - 1], uid: Math.random() };
+      const availableObs = [];
+      if (level >= 3) availableObs.push(10); // Cajas
+      if (level >= 4) availableObs.push(11); // Hielo
+      if (level >= 5) availableObs.push(12); // Cadenas
+      
+      if (availableObs.length > 0) {
+        const obsType = availableObs[Math.floor(Math.random() * availableObs.length)];
+        return { ...MATCH3_ITEMS[obsType - 1], uid: Math.random() };
+      }
     }
+
+    // Items normales (más variedad según nivel)
+    const normalVariety = level >= 4 ? 7 : 5;
     return {
-      ...MATCH3_ITEMS[Math.floor(Math.random() * 5)],
+      ...MATCH3_ITEMS[Math.floor(Math.random() * normalVariety)],
       uid: Math.random()
     };
   });
