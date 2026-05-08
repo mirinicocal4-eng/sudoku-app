@@ -20,7 +20,10 @@ export const CaseSelector = ({ caseIdx, step, unlockedCases, info, isTestMode, i
   const p = PERSONAJES[pKey];
 
   return (
-    <div className="app-container" style={{paddingLeft: '420px'}}>
+    <div className="app-container" style={{
+      backgroundImage: 'linear-gradient(rgba(13, 17, 23, 0.8), rgba(13, 17, 23, 0.85)), url(/despacho_pro_1778199357053.png)',
+      paddingLeft: '420px'
+    }}>
       {renderDetective()}
       <h1 className="title" style={{display:'flex', alignItems:'center', gap:'15px'}}>
         {info.titulo}

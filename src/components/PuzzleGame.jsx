@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-const ESCENAS = ["/escena_crimen.png", "/escena_puerto.png", "/escena_mansion.png", "/escena_casino.png", "/escena_callejon.png"];
+const ESCENAS = [
+  "/escena_crimen.png", 
+  "/escena_puerto.png", 
+  "/escena_mansion.png", 
+  "/escena_casino.png", 
+  "/escena_callejon.png",
+  "/escena_laboratorio.png",
+  "/escena_callejon_oscuro.png"
+];
 
 export const PuzzleGame = ({ level, onWin, onExit }) => {
   const [grid, setGrid] = useState([]);
